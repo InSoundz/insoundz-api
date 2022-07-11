@@ -31,23 +31,27 @@ class AudioAPI(object):
         else:
             response.raise_for_status()
 
-    def enhance_file(self, file_uri, retention=None):
+    @staticmethod
+    def get_default_api_endpoint():
+        return DEFAULT_API_ENDPOINT
+
+    def enhance_file(self, file_url, retention=None):
         """
-        Send a URI of the original audio file to the Audio API for audio
+        Send a URL of the original audio file to the Audio API for audio
         enhancement. The function returns a JSON object with a sessionId key
         to be later used by the enhance_status function.
 
-        :param str file_uri:    The URI of the original audio file for
+        :param str file_url:    The URL of the original audio file for
                                 audio enhancement.
-        :param str retention:   The client can request to maintain the URI
+        :param str retention:   The client can request to maintain the URL
                                 of the enhanced audio file.
                                 for <retention> minutes.
                                 (This param is optional)
         :return:                A JSON with a <sessionId>
         :rtype:                 A JSON object
         """
-        url = urlunsplit(("https", self._api_endpoint, "/enhance", "", ""))
-        data = {"file_uri": file_uri}
+        url = urlunsplit(("https", self._api_endpoint, "enhance", "", ""))
+        data = {"file_url": file_url}
         if retention:
             data["retention"] = retention
 
@@ -61,16 +65,14 @@ class AudioAPI(object):
 
         :param str session_id:  Was given by enhance_file().
         :return:                A JSON with:
-                                #   <file_uri> of the enhanced file in-case of
-                                    <status> is DONE.
-                                #   <failure_reason> in-case of
-                                    <status> is FAILURE.
-                                #   <status> only (of DOWNLOADING|PROCESSING).
+                                #   <url> of the enhanced file in-case of
+                                    <status> is "done".
+                                #   <msg> in-case of
+                                    <status> is "failure".
+                                #   <status> only (of "downloading"|"processing").
         :rtype:                 A JSON object
         """
-        parameters = {"session_id": session_id}
-        query = urlencode(query=parameters, doseq=True)
-        url = urlunsplit(("https", self._api_endpoint, "/enhance", query, ""))
+        url = urlunsplit(("https", self._api_endpoint, f"enhance/{session_id}", "", ""))
 
         response = requests.get(url, headers=self._headers)
         return self._parse_response(response)

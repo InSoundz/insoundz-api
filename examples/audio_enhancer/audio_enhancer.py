@@ -29,6 +29,10 @@ class AudioEnhancer(object):
         logger.addHandler(stdout_handler)
         return logger
 
+    @staticmethod
+    def get_default_status_interval():
+        return DEFAULT_STATUS_INTERVAL_SEC
+
     def _upload_src_file_to_s3(self, src_path):
         try:
             self._logger.info(f"Uploading {src_path}.")
@@ -36,24 +40,29 @@ class AudioEnhancer(object):
             key = os.path.join(AUDIOAPI_UPLOAD_DIR, filename)
             s3 = boto3.resource('s3')
             s3.meta.client.upload_file(src_path, BACKET, key)
-            src_uri = os.path.join("s3://", BACKET, key)
+            
+            #TODO: this temporary since the AudioAPI currently doesn't support s3 path
+            #src_url = os.path.join("s3://", BACKET, key)
+            s3 = boto3.client('s3')
+            src_url = s3.generate_presigned_url('get_object', Params = {'Bucket': BACKET, 'Key': key}) 
+
         except Exception as e:
             self._logger.exception(e)
 
-        self._logger.info(f"{src_path} was uploaded succesfully to {src_uri}.")
-        return src_uri
+        self._logger.info(f"{src_path} was uploaded succesfully to {src_url}.")
+        return src_url
 
-    def _delete_file_from_s3(self, src_uri):
+    def _delete_file_from_s3(self, src_url):
         try:
-            self._logger.info(f"Deleting {src_uri}.")
-            filename = os.path.split(src_uri)[1]
+            self._logger.debug(f"Deleting {src_url}.")
+            filename = os.path.split(src_url)[1]
             key = os.path.join(AUDIOAPI_UPLOAD_DIR, filename)
             s3 = boto3.resource('s3')
             s3.Object(BACKET, key).delete()
         except Exception as e:
             self._logger.exception(e)
 
-        self._logger.info(f"{src_uri} was deleted succesfully to {src_uri}.")
+        self._logger.debug(f"{src_url} was deleted succesfully.")
 
     def _create_dst_path(self, src_path):
         src_filename_with_ext = os.path.split(src_path)[1]
@@ -61,29 +70,30 @@ class AudioEnhancer(object):
         dst_path = os.path.join(os.getcwd(), src_filename_not_ext + "_enhanced.wav")
         return dst_path
 
-    def _download_enhanced_file(self, enhanced_file_uri, dst_path):
+    def _download_enhanced_file(self, enhanced_file_url, dst_path):
         self._logger.info(f"Downloading enhanced file to local machine at {dst_path}")
-        wget.download(enhanced_file_uri, dst_path)
-        self._logger.info("")  # An aesthetic linebreak
+        wget.download(enhanced_file_url, dst_path)
+        print()  # An aesthetic linebreak
+        self._logger.info(f"{dst_path} was downloaded succesfully.")
 
     def enhance_file(self, src_type, src_path, no_download, dst_path, retention=None):
         """ 
         It uses the audioapi package to enhance the file that is located in <src_path>. 
-        After the audio enhancement process is done, the URI of the new and enhanced file will be displayed.
+        After the audio enhancement process is done, the URL of the new and enhanced file will be displayed.
         The enhanced file will be downloaded to the local machine at <dst_path> unless
         the <no_download> flag is set.
 
         :param str  src_type:       Should only be 'local' or 'remote'.
         :param str  src_path:       If <src_type=='local'> then <src_path> contain a full path of the original audio file on the local machine. 
-                                    If <src_type=='remote'> then <src_path> contain the URI of the original audio file.
+                                    If <src_type=='remote'> then <src_path> contain the URL of the original audio file.
         :param bool no_download:    Set this flag if want to skip the download of the enhanced file to the local machine.
         :param str  dst_path:       The enhanced file will be downloaded to the local machine at <dst_path> unless
                                     the <no_download> flag is set.
                                     If <dst_path> is missing, the enhanced file will be downloaded to the current directory
                                     under the name <original_filename>_enhanced.wav.
-        :param int  retention:      The client can request the audioapi to keep the URI of the enhanced file 
+        :param int  retention:      The client can request the audioapi to keep the URL of the enhanced file 
                                     alive for a <retention> minutes (retention time). Otherwise there is no
-                                    guarantee for how long the URI will be available and therefore it's
+                                    guarantee for how long the URL will be available and therefore it's
                                     recommanded to use the download (so don't set the <no_download> flag).
                                     (This param is optional)
         :return:                    None
@@ -95,18 +105,18 @@ class AudioEnhancer(object):
         api = audioapi.AudioAPI(**kwargsNotNone)
 
         try:
-            # Upload the local file to a temporary URI
+            # Upload the local file to a temporary URL
             if src_type == 'local':
-                src_uri = self._upload_src_file_to_s3(src_path)
+                src_url = self._upload_src_file_to_s3(src_path)
             elif src_type =='remote':
-                src_uri = src_path
+                src_url = src_path
             else:
                 raise Exception("Illegal <src_type>. Must be 'local' or 'remote'.")
 
             # Send original file to AudioAPI
-            self._logger.info(f"Sending {src_uri} to AudioAPI for processing.")
-            ret_val = api.enhance_file(src_uri, retention)
-            session_id = ret_val["sessionId"]
+            self._logger.info(f"Sending {src_url} to AudioAPI for processing.")
+            ret_val = api.enhance_file(src_url, retention)
+            session_id = ret_val["session_id"]
 
             # Check status
             prev_status = None
@@ -117,26 +127,26 @@ class AudioEnhancer(object):
                     self._logger.info(f"Session ID [{session_id}] job status [{status}].")
                 prev_status = status
 
-                if status == "DONE":
-                    enhanced_file_uri = ret_val["file_uri"]
-                    self._logger.info(f"Enhanced file URI is located at {enhanced_file_uri}")
+                if status == "done":
+                    enhanced_file_url = ret_val["url"]
+                    self._logger.info(f"Enhanced file URL is located at {enhanced_file_url}")
                     break
-                elif status == "FAILURE":
-                    failure_reason = ret_val["failure_reason"]
+                elif status == "failure":
+                    failure_reason = ret_val["msg"]
                     self._logger.error(f"Failure reason: {failure_reason}")
                     break
                 else:
                     time.sleep(self._status_interval_sec)
 
             # Downloading enhanced file
-            if status == "DONE" and not no_download:
+            if status == "done" and not no_download:
                 if not dst_path:
                     dst_path = self._create_dst_path(src_path)
-                self._download_enhanced_file(enhanced_file_uri, dst_path)
+                self._download_enhanced_file(enhanced_file_url, dst_path)
 
-            # Delete the original file URI in case it was created by the script
+            # Delete the original file URL in case it was created by the script
             if src_type == 'local':
-                self._delete_file_from_s3(src_uri)
+                self._delete_file_from_s3(src_url)
 
         except Exception as e:
             self._logger.error(e)
