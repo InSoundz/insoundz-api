@@ -1,10 +1,9 @@
 #!/usr/bin/env python
  
 import click
-import os
 from goto import with_goto
 import asyncio
-from audio_enhancer import AudioEnhancer
+from audio_enhancer.audio_enhancer import AudioEnhancer
 from audioapi import audioapi as api
 
 def command_required_option_from_option(require_name, require_map):
@@ -40,7 +39,6 @@ required_options = {
 def enhance_stream(api_token, api_endpoint, src_type, src_path, dst_path, sample_rate, chunksize):
     click.echo(f"api_token {api_token}, api_endpoint {api_endpoint}, src_type {src_type}, src_path {src_path}, dst_path {dst_path}, sample_rate {sample_rate}, chunksize {chunksize}")
     enhancer = AudioEnhancer(api_token, api_endpoint)
-    return
     enhancer.enhance_stream(src_type, src_path, dst_path, sample_rate, chunksize)
 
 @click.command('enhance-file', context_settings={'show_default': True})

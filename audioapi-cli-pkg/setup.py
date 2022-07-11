@@ -6,6 +6,7 @@ setup(
     description="A simple CLI for Insoundz Audio API tool for audio enhancement",
     readme = "README.md",
     license_files = ('LICENSE',),
+    python_requires=">=3.7",
     packages=find_packages(),
-    install_requires=['click', 'goto-statement', 'get', 'boto3', 'audioapi'],
+    install_requires=['click', 'goto-statement', 'wget', 'boto3', 'audioapi'],
  )
