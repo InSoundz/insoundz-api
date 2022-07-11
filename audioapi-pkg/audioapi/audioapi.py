@@ -69,10 +69,12 @@ class AudioAPI(object):
                                     <status> is "done".
                                 #   <msg> in-case of
                                     <status> is "failure".
-                                #   <status> only (of "downloading"|"processing").
+                                #   <status> only
+                                    (of "downloading"|"processing").
         :rtype:                 A JSON object
         """
-        url = urlunsplit(("https", self._api_endpoint, f"enhance/{session_id}", "", ""))
+        url = urlunsplit(('https', self._api_endpoint,
+                         f'enhance/{session_id}', '', ''))
 
         response = requests.get(url, headers=self._headers)
         return self._parse_response(response)
