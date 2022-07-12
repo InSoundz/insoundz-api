@@ -1,8 +1,6 @@
-<div id="photo" style="text-align: left">
-  <img style="float:left" src="https://insoundz.com/wp-content/uploads/2020/05/in-fav.png" width="120" alt="">
-  <h1 style="vertical-align:text-bottom; height: 40px; ">&nbsp; Insoundz AudioAPI Library</h1>
-   <h4 style="vertical-align:text-bottom; height: 40px; ">&emsp; The AudioAPI library includes the audioapi package and the audioapi-cli packages. </h4>
-</div>
+<h1><img align="center" height="100" src="https://drive.google.com/uc?export=view&id=1EApcDAHEb7qLMGQr-04e5edTWQ1XA0SC"> &nbsp; &nbsp; &nbsp; AudioAPI Library</h1>
+The AudioAPI library includes the audioapi package and the audioapi-cli packages.
+<br />
 <br />
 
 ## audioapi Package
