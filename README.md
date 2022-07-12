@@ -3,7 +3,6 @@
   <h1 style="vertical-align:text-bottom; height: 40px; ">Insoundz AudioAPI Library</h1>
    <h4 style="vertical-align:text-bottom; height: 40px; ">The AudioAPI library includes the audioapi package and the audioapi-cli package. </h4>
 </div>
-<br />
 
 ## audioapi Package
 A simple pythonic client to access Insoundz AudioAPI for audio enhancement. 
@@ -14,8 +13,8 @@ A simple pythonic client to access Insoundz AudioAPI for audio enhancement.
 A simple CLI which is used to give the client an easy and fast access to Insoundz AudioAPI (based uppon the audioapi package).
 <br />
 <br />
+<br />
 
----
 
 ### Installation
 - Make sure you are running python3.7 or later. 
