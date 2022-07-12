@@ -25,9 +25,7 @@ pip install git+https://gitlab.com/InSoundz/audioapi-cli.git@feature/INZ-1961#su
 
 ### Running the AudioAPI-CLI
 ```console
-git clone git@gitlab.com:InSoundz/audioapi-cli.git -b feature/INZ-1961
-cd audioapi-cli
-./audioapi_cli --help
+audioapi_cli --help
 ```
 
 ### Example #1:
