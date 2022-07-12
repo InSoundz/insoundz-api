@@ -1,4 +1,4 @@
-<h1><img align="sub" height="64" src="https://drive.google.com/uc?export=view&id=1_9IxKzwdhPWeD7NsYUf3oH1GqUDwZSki"> &nbsp; &nbsp; &nbsp; AudioAPI Library</h1>
+<h1><img align="center" height="140" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; AudioAPI Library</h1>
 The AudioAPI library includes the audioapi package and the audioapi-cli packages.
 <br />
 <br />
