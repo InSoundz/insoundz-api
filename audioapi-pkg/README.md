@@ -9,6 +9,7 @@ Sending the URL of the original file for audio enhancement process and download 
 ```python
 from audioapi import audioapi
 import time
+import wget
 
 def enhance_file(api_token, src_url, dst_path):
 
