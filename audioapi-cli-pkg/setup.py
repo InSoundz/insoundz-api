@@ -4,7 +4,7 @@ setup(
     name='audioapi-cli',  
     version='0.0.1',
     description="A simple CLI for Insoundz Audio API tool for audio enhancement",
-    entry_points={"console_scripts": ["audioapi_cli=audioapi_cli:main"]},
+    entry_points={"console_scripts": ["audioapi-cli=audioapi_cli:main"]},
     readme = "README.md",
     license_files = ('LICENSE',),
     python_requires=">=3.7",
