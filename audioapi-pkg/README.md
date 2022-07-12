@@ -1,8 +1,6 @@
-<div id="photo" style="text-align: left">
-  <img style="vertical-align:baseline" src="https://insoundz.com/wp-content/uploads/2020/05/in-fav.png" width="120" alt="">
-  <h1 style="vertical-align:text-bottom; height: 40px; ">audioapi Package</h1>
-   <h4 style="vertical-align:text-bottom; height: 40px; ">A simple pythonic client to access Insoundz AudioAPI for audio enhancement. </h4>
-</div>
+<h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; audioapi Package</h1>
+A simple pythonic client to access Insoundz AudioAPI for audio enhancement.
+<br />
 <br />
 
 ## Getting started: Audio file enhancement
