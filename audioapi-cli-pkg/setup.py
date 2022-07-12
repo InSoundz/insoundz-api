@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='audioapi-cli',  
+    name='audioapi_cli',  
     version='0.0.1',
     description="A simple CLI for Insoundz Audio API tool for audio enhancement",
-    entry_points={"console_scripts": ["audioapi-cli=cli.audioapi_cli:main"]},
+    entry_points={"console_scripts": ["audioapi_cli=cli.audioapi_cli:audioapi_cli"]},
     readme = "README.md",
     license_files = ('LICENSE',),
     python_requires=">=3.7",
