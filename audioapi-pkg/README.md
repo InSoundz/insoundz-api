@@ -7,7 +7,10 @@ A simple pythonic client to access Insoundz AudioAPI for audio enhancement.
 Sending the URL of the original file for audio enhancement process and download the enhanced file.
 
 ```python
-def enhance_file(src_url, dst_path):
+from audioapi import audioapi
+import time
+
+def enhance_file(api_token, src_url, dst_path):
 
     api = audioapi.AudioAPI(api_token)
     ret_val = api.enhance_file(src_url)
