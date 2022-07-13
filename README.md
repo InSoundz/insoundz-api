@@ -13,7 +13,7 @@ A simple CLI which is used to give the client an easy and fast access to Insound
 <br />
 
 ## Installation and Getting started
-[See instruction here.](audioapi-cli-pkg/README.md)
+[See instructions here.](audioapi-cli-pkg/README.md)
 
 <br />
 <br />
@@ -33,4 +33,4 @@ pip install git+https://gitlab.com/InSoundz/audioapi-cli.git@feature/INZ-1961#su
 - [Getting AWS keys and configure AWS-CLI](https://inz.atlassian.net/wiki/spaces/DEV/pages/1740210177/Get+Access+Key+and+Secret+Key+and+configure+AWS-CLI)
 
 ## Getting started
-[See instruction here.](audioapi-cli-pkg/README.md)
+[See instructions here.](audioapi-cli-pkg/README.md)
