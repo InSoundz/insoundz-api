@@ -3,6 +3,12 @@ A simple pythonic client to access Insoundz AudioAPI for audio enhancement.
 <br />
 <br />
 
+## Installation
+- Please make sure you are running python3.7 or later.
+```console
+pip install audioapi
+```
+
 ## Getting started: Audio file enhancement
 Sending the URL of the original file for audio enhancement process and download the enhanced file.
 
@@ -10,6 +16,7 @@ Sending the URL of the original file for audio enhancement process and download 
 from audioapi import audioapi
 import time
 import wget
+
 
 def enhance_file(api_token, src_url, dst_path):
 
@@ -36,4 +43,11 @@ def enhance_file(api_token, src_url, dst_path):
 
     # Downloading enhanced file
     wget.download(enhanced_file_url, dst_path)
+
+
+enhance_file(
+    api_token="my-key", 
+    src_url="https://api.insoundz.io/examples/example_file.wav", 
+    dst_path="/my_enhanced_files_dir/enhanced_file.wav"
+)
 ```
