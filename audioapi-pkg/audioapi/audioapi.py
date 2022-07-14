@@ -4,17 +4,17 @@ from urllib.parse import urlencode, urlunsplit
 import websockets
 import logging
 
-DEFAULT_URL_ENDPOINT = "api.insoundz.io"
+DEFAULT_ENDPOINT_URL = "api.insoundz.io"
 
 
 class AudioAPI(object):
     def __init__(
             self,
             api_token,
-            url_endpoint=DEFAULT_URL_ENDPOINT,
+            endpoint_url=DEFAULT_ENDPOINT_URL,
             logger=None):
         self._api_token = api_token
-        self._url_endpoint = url_endpoint
+        self._endpoint_url = endpoint_url
         self._logger = logger
         if not self._logger:
             self._logger = logging.getLogger(__class__.__name__)
@@ -32,8 +32,8 @@ class AudioAPI(object):
             response.raise_for_status()
 
     @staticmethod
-    def get_default_url_endpoint():
-        return DEFAULT_URL_ENDPOINT
+    def get_default_endpoint_url():
+        return DEFAULT_ENDPOINT_URL
 
     def enhance_file(self, file_url, retention=None):
         """
@@ -50,7 +50,7 @@ class AudioAPI(object):
         :return:                A JSON with a <sessionId>
         :rtype:                 A JSON object
         """
-        url = urlunsplit(("https", self._url_endpoint, "enhance", "", ""))
+        url = urlunsplit(("https", self._endpoint_url, "enhance", "", ""))
         data = {"file_url": file_url}
         if retention:
             data["retention"] = retention
@@ -73,7 +73,7 @@ class AudioAPI(object):
                                     (of "downloading"|"processing").
         :rtype:                 A JSON object
         """
-        url = urlunsplit(('https', self._url_endpoint,
+        url = urlunsplit(('https', self._endpoint_url,
                          f'enhance/{session_id}', '', ''))
 
         response = requests.get(url, headers=self._headers)
@@ -91,7 +91,7 @@ class AudioAPI(object):
         """
         parameters = {"sampleRate": sample_rate, "fileType": file_type}
         query = urlencode(query=parameters, doseq=True)
-        uri = urlunsplit(("wss", self._url_endpoint, "/enhance", query, ""))
+        uri = urlunsplit(("wss", self._endpoint_url, "/enhance", query, ""))
 
         try:
             conn = websockets.connect(uri)
