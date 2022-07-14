@@ -16,12 +16,12 @@ DEFAULT_STATUS_INTERVAL_SEC = 1
 class AudioEnhancer(object):
     def __init__(
         self,
-        api_token, api_endpoint,
+        api_token, url_endpoint,
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
         self._api_token = api_token
-        self._api_endpoint = api_endpoint
+        self._url_endpoint = url_endpoint
         self._status_interval_sec = status_interval_sec
 
     def _initialize_logger(self, logger_name):
@@ -131,7 +131,7 @@ class AudioEnhancer(object):
 
         kwargs = dict(
             api_token=self._api_token,
-            api_endpoint=self._api_endpoint,
+            url_endpoint=self._url_endpoint,
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}

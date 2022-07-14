@@ -49,10 +49,10 @@ required_options = {
     required=True,
 )
 @click.option(
-    "--api-endpoint",
+    "--url-endpoint",
     type=str,
-    help="Use an alternative API endpoint (without the 'wss://' prefix)",
-    default=api.AudioAPI.get_default_api_endpoint(),
+    help="Use an alternative URL endpoint (without the 'wss://' prefix)",
+    default=api.AudioAPI.get_default_url_endpoint(),
 )
 @click.option(
     "--src-type",
@@ -79,10 +79,10 @@ required_options = {
 )
 @click.option("--chunksize", type=int, default=32768, help="[bytes]")
 def enhance_stream(
-    api_token, api_endpoint, src_type,
+    api_token, url_endpoint, src_type,
     src_path, dst_path, sample_rate, chunksize
 ):
-    enhancer = AudioEnhancer(api_token, api_endpoint)
+    enhancer = AudioEnhancer(api_token, url_endpoint)
     enhancer.enhance_stream(src_type, src_path, dst_path,
                             sample_rate, chunksize)
 
@@ -96,10 +96,10 @@ def enhance_stream(
     required=True,
 )
 @click.option(
-    "--api-endpoint",
+    "--url-endpoint",
     type=str,
-    help="Use an alternative API endpoint (without the 'http://' prefix)",
-    default=api.AudioAPI.get_default_api_endpoint(),
+    help="Use an alternative URL endpoint (without the 'http://' prefix)",
+    default=api.AudioAPI.get_default_url_endpoint(),
 )
 @click.option(
     "--src-type",
@@ -138,10 +138,10 @@ def enhance_stream(
     default=AudioEnhancer.get_default_status_interval(),
 )
 def enhance_file(
-    api_token=None, api_endpoint=None, src_type=None, src_path=None,
+    api_token=None, url_endpoint=None, src_type=None, src_path=None,
     no_download=None, dst_path=None, retention=None, status_interval=None,
 ):
-    enhancer = AudioEnhancer(api_token, api_endpoint, status_interval)
+    enhancer = AudioEnhancer(api_token, url_endpoint, status_interval)
     enhancer.enhance_file(src_type, src_path, no_download, dst_path, retention)
 
 
