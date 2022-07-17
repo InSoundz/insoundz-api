@@ -1,29 +1,9 @@
 #!/usr/bin/env python
 
 import click
-from goto import with_goto
 import asyncio
 from audio_enhancer.audio_enhancer import AudioEnhancer
 from audioapi import audioapi as api
-
-
-def command_required_option_from_option(require_name, require_map):
-    class CommandOptionRequiredClass(click.Command):
-        @with_goto
-        def invoke(self, ctx):
-            require = ctx.params[require_name]
-            if require not in require_map:
-                goto.Exit
-            if ctx.params[require_map[require].lower()] is None:
-                raise click.ClickException(
-                    "With {}={} must specify option --{}".format(
-                        require_name, require, require_map[require]
-                    )
-                )
-            label.Exit
-            super(CommandOptionRequiredClass, self).invoke(ctx)
-
-    return CommandOptionRequiredClass
 
 
 @click.group()
@@ -31,16 +11,7 @@ def audioapi_cli():
     pass
 
 
-required_options = {
-    "file": "src_path",
-}
-
-
-@click.command(
-    "enhance-stream",
-    context_settings={"show_default": True},
-    cls=command_required_option_from_option("src_type", required_options),
-)
+@click.command("enhance-stream", context_settings={"show_default": True})
 @click.option(
     "--api-token",
     type=str,
@@ -51,19 +22,15 @@ required_options = {
 @click.option(
     "--endpoint-url",
     type=str,
-    help="Use an alternative URL endpoint (without the 'wss://' prefix)",
+    help="Use an alternative endpoint URL (without the 'wss://' prefix)",
     default=api.AudioAPI.get_default_endpoint_url(),
 )
 @click.option(
-    "--src-type",
-    type=click.Choice(["file", "stream"]),
-    prompt="Source type",
-    required=True,
-)
-@click.option(
-    "--src-path",
+    "--src",
     type=str,
-    help="Path of stream to process [required if <src-type=file>]",
+    help="A URL or a local path of the original audio file",
+    prompt="src",
+    required=True,
 )
 @click.option(
     "--dst-path",
@@ -79,12 +46,10 @@ required_options = {
 )
 @click.option("--chunksize", type=int, default=32768, help="[bytes]")
 def enhance_stream(
-    api_token, endpoint_url, src_type,
-    src_path, dst_path, sample_rate, chunksize
+    api_token, endpoint_url, src, dst_path, sample_rate, chunksize
 ):
     enhancer = AudioEnhancer(api_token, endpoint_url)
-    enhancer.enhance_stream(src_type, src_path, dst_path,
-                            sample_rate, chunksize)
+    enhancer.enhance_stream(src, dst_path, sample_rate, chunksize)
 
 
 @click.command("enhance-file", context_settings={"show_default": True})
@@ -98,23 +63,14 @@ def enhance_stream(
 @click.option(
     "--endpoint-url",
     type=str,
-    help="Use an alternative URL endpoint (without the 'http://' prefix)",
+    help="Use an alternative endpoint URL (without the 'http://' prefix)",
     default=api.AudioAPI.get_default_endpoint_url(),
 )
 @click.option(
-    "--src-type",
-    type=click.Choice(["local", "remote"]),
-    prompt="Source type",
-    required=True,
-)
-@click.option(
-    "--src-path",
+    "--src",
     type=str,
-    help="If choose <src-type=local> then <src-path> should point the full \
-            path of the source file on the local machine. \
-            If choose <src-type=remote> then <src-path> should contain the \
-            URL of the source file",
-    prompt="Source path",
+    help="A URL or a local path of the original audio file",
+    prompt="src",
     required=True,
 )
 @click.option(
@@ -138,11 +94,11 @@ def enhance_stream(
     default=AudioEnhancer.get_default_status_interval(),
 )
 def enhance_file(
-    api_token=None, endpoint_url=None, src_type=None, src_path=None,
+    api_token=None, endpoint_url=None, src=None,
     no_download=None, dst_path=None, retention=None, status_interval=None,
 ):
     enhancer = AudioEnhancer(api_token, endpoint_url, status_interval)
-    enhancer.enhance_file(src_type, src_path, no_download, dst_path, retention)
+    enhancer.enhance_file(src, no_download, dst_path, retention)
 
 
 audioapi_cli.add_command(enhance_file)
