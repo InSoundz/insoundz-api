@@ -1,5 +1,4 @@
 import requests
-from http import HTTPStatus
 from urllib.parse import urlencode, urlunsplit
 import websockets
 import logging
@@ -26,10 +25,8 @@ class AudioAPI(object):
         }
 
     def _parse_response(self, response):
-        if response.status_code == HTTPStatus.OK:
-            return response.json()
-        else:
-            response.raise_for_status()
+        response.raise_for_status()
+        return response.json()
 
     @staticmethod
     def get_default_endpoint_url():
