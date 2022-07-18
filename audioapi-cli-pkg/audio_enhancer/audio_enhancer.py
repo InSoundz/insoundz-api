@@ -2,15 +2,10 @@ import logging
 import sys
 import time
 import wget
-import boto3
 import os
 from urllib.parse import urlparse 
 from audioapi import audioapi
 
-
-# should be taken from audioapi module with get_backet() ?
-BACKET = "insoundz-wavs"
-AUDIOAPI_UPLOAD_DIR = "audioapi_tmp"
 DEFAULT_STATUS_INTERVAL_SEC = 1
 
 
@@ -39,41 +34,6 @@ class AudioEnhancer(object):
     @staticmethod
     def get_default_status_interval():
         return DEFAULT_STATUS_INTERVAL_SEC
-
-    def _upload_src_file_to_s3(self, src):
-        try:
-            self._logger.info(f"Uploading {src}.")
-            # assuming a valid path (file with extension)
-            filename = os.path.basename(src)
-            key = os.path.join(AUDIOAPI_UPLOAD_DIR, filename)
-            s3 = boto3.resource("s3")
-            s3.meta.client.upload_file(src, BACKET, key)
-
-            # TODO: this temporary since the AudioAPI currently doesn't
-            #       support s3 path
-            # src_url = os.path.join("s3://", BACKET, key)
-            s3 = boto3.client("s3")
-            src_url = s3.generate_presigned_url(
-                "get_object", Params={"Bucket": BACKET, "Key": key}
-            )
-
-        except Exception as e:
-            self._logger.exception(e)
-
-        self._logger.info(f"{src} was uploaded succesfully to {src_url}.")
-        return src_url
-
-    def _delete_file_from_s3(self, src_url):
-        try:
-            self._logger.debug(f"Deleting {src_url}.")
-            filename = os.path.split(src_url)[1]
-            key = os.path.join(AUDIOAPI_UPLOAD_DIR, filename)
-            s3 = boto3.resource("s3")
-            s3.Object(BACKET, key).delete()
-        except Exception as e:
-            self._logger.exception(e)
-
-        self._logger.debug(f"{src_url} was deleted succesfully.")
 
     def _create_dst_path(self, src):
         src_filename_with_ext = os.path.split(src)[1]
@@ -140,8 +100,9 @@ class AudioEnhancer(object):
             if self._is_url(src):
                 src_url = src
             else:
-                # Upload the local file to a temporary URL
-                src_url = self._upload_src_file_to_s3(src)
+                # Send to /enhance a request to upload.
+                # The last should return a URL to upload to.
+                raise NotImplementedError("/enhance request to upload yet not supported.")
 
             # Send original file to AudioAPI
             self._logger.info(f"Sending {src_url} to AudioAPI for processing.")
@@ -177,10 +138,6 @@ class AudioEnhancer(object):
                 if not dst_path:
                     dst_path = self._create_dst_path(src)
                 self._download_enhanced_file(enhanced_file_url, dst_path)
-
-            # Delete the original file URL in case it was created by the script
-            if not self._is_url(src):
-                self._delete_file_from_s3(src_url)
 
         except Exception as e:
             self._logger.error(e)
