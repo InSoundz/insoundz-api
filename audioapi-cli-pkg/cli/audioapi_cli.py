@@ -47,17 +47,10 @@ def audioapi_cli():
 )
 @click.option("--chunksize", type=int, default=32768, help="[bytes]")
 def enhance_stream(
-<<<<<<< HEAD
     api_token, endpoint_url, src, dst, sample_rate, chunksize
 ):
     enhancer = AudioEnhancer(api_token, endpoint_url)
     enhancer.enhance_stream(src, dst, sample_rate, chunksize)
-=======
-    api_token, endpoint_url, src, dst_path, sample_rate, chunksize
-):
-    enhancer = AudioEnhancer(api_token, endpoint_url)
-    enhancer.enhance_stream(src, dst_path, sample_rate, chunksize)
->>>>>>> origin/develop
 
 
 @click.command("enhance-file", context_settings={"show_default": True})
@@ -104,17 +97,10 @@ def enhance_stream(
 )
 def enhance_file(
     api_token=None, endpoint_url=None, src=None,
-<<<<<<< HEAD
     no_download=None, dst=None, retention=None, status_interval=None,
 ):
     enhancer = AudioEnhancer(api_token, endpoint_url, status_interval)
     enhancer.enhance_file(src, no_download, dst, retention)
-=======
-    no_download=None, dst_path=None, retention=None, status_interval=None,
-):
-    enhancer = AudioEnhancer(api_token, endpoint_url, status_interval)
-    enhancer.enhance_file(src, no_download, dst_path, retention)
->>>>>>> origin/develop
 
 
 audioapi_cli.add_command(enhance_file)
