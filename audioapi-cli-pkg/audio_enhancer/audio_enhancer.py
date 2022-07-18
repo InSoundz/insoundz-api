@@ -4,6 +4,7 @@ import time
 import wget
 import boto3
 import os
+from urllib.parse import urlparse 
 from audioapi import audioapi
 
 
@@ -39,14 +40,14 @@ class AudioEnhancer(object):
     def get_default_status_interval():
         return DEFAULT_STATUS_INTERVAL_SEC
 
-    def _upload_src_file_to_s3(self, src_path):
+    def _upload_src_file_to_s3(self, src):
         try:
-            self._logger.info(f"Uploading {src_path}.")
+            self._logger.info(f"Uploading {src}.")
             # assuming a valid path (file with extension)
-            filename = os.path.split(src_path)[1]
+            filename = os.path.basename(src)
             key = os.path.join(AUDIOAPI_UPLOAD_DIR, filename)
             s3 = boto3.resource("s3")
-            s3.meta.client.upload_file(src_path, BACKET, key)
+            s3.meta.client.upload_file(src, BACKET, key)
 
             # TODO: this temporary since the AudioAPI currently doesn't
             #       support s3 path
@@ -59,7 +60,7 @@ class AudioEnhancer(object):
         except Exception as e:
             self._logger.exception(e)
 
-        self._logger.info(f"{src_path} was uploaded succesfully to {src_url}.")
+        self._logger.info(f"{src} was uploaded succesfully to {src_url}.")
         return src_url
 
     def _delete_file_from_s3(self, src_url):
@@ -74,8 +75,8 @@ class AudioEnhancer(object):
 
         self._logger.debug(f"{src_url} was deleted succesfully.")
 
-    def _create_dst_path(self, src_path):
-        src_filename_with_ext = os.path.split(src_path)[1]
+    def _create_dst_path(self, src):
+        src_filename_with_ext = os.path.split(src)[1]
         src_filename_not_ext = os.path.splitext(src_filename_with_ext)[0]
         dst_path = os.path.join(os.getcwd(),
                                 src_filename_not_ext + "_enhanced.wav")
@@ -88,24 +89,22 @@ class AudioEnhancer(object):
         print()  # An aesthetic linebreak
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 
+    def _is_url(self, src):
+        return urlparse(src).scheme != "" 
+
     def enhance_file(
-        self, src_type, src_path,
-        no_download=False, dst_path=None, retention=None
+        self, src, no_download=False, dst_path=None, retention=None
     ):
         """
         It uses the audioapi package to enhance the file that is located
-        in <src_path>.
+        in <src>.
         After the audio enhancement process is done, the URL of the new and
         enhanced file will be displayed.
         The enhanced file will be downloaded to the local machine at
         <dst_path> unless the <no_download> flag is set.
 
-        :param str  src_type:       Should only be 'local' or 'remote'.
-        :param str  src_path:       If <src_type=='local'> then <src_path>
-                                    contain a full path of the original audio
-                                    file on the local machine.
-                                    If <src_type=='remote'> then <src_path>
-                                    contain the URL of the original audio file.
+        :param str  src:            Contains a URL or a local path of the
+                                    original audio file.
         :param bool no_download:    Set this flag if want to skip the download
                                     of the enhanced file to the local machine.
                                     (This param is optional)
@@ -138,14 +137,11 @@ class AudioEnhancer(object):
         api = audioapi.AudioAPI(**kwargsNotNone)
 
         try:
-            # Upload the local file to a temporary URL
-            if src_type == "local":
-                src_url = self._upload_src_file_to_s3(src_path)
-            elif src_type == "remote":
-                src_url = src_path
+            if self._is_url(src):
+                src_url = src
             else:
-                raise Exception("Illegal <src_type>. Must be 'local' \
-                                or 'remote'.")
+                # Upload the local file to a temporary URL
+                src_url = self._upload_src_file_to_s3(src)
 
             # Send original file to AudioAPI
             self._logger.info(f"Sending {src_url} to AudioAPI for processing.")
@@ -179,11 +175,11 @@ class AudioEnhancer(object):
             # Downloading enhanced file
             if status == "done" and not no_download:
                 if not dst_path:
-                    dst_path = self._create_dst_path(src_path)
+                    dst_path = self._create_dst_path(src)
                 self._download_enhanced_file(enhanced_file_url, dst_path)
 
             # Delete the original file URL in case it was created by the script
-            if src_type == "local":
+            if not self._is_url(src):
                 self._delete_file_from_s3(src_url)
 
         except Exception as e:
@@ -191,6 +187,5 @@ class AudioEnhancer(object):
 
     # TODO: need to support this use-case
     def enhance_stream(
-            self, src_stream_type, src_path,
-            dst_path, rate, chunksize):
+            self, src_stream_type, src, dst_path, rate, chunksize):
         raise NotImplementedError("'enhance_stream()' yet not supported.")

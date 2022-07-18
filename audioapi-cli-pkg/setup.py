@@ -11,7 +11,6 @@ setup(
     packages=find_packages(),
     install_requires=[
                         'click',
-                        'goto-statement',
                         'wget',
                         'boto3',
                         'audioapi'
