@@ -43,13 +43,31 @@ class AudioEnhancer(object):
         src_filename_with_ext = os.path.split(src)[1]
         src_filename_not_ext = os.path.splitext(src_filename_with_ext)[0]
         src_filename_ext = os.path.splitext(src_filename_with_ext)[1]     
-        return src_filename_not_ext + "_enhanced" + src_filename_ext
+        return src_filename_not_ext + "_enhanced" + src_filename_ext[:4]
 
-    def _download_enhanced_file(self, enhanced_file_url, dst):
-        self._logger.info(f"Downloading enhanced file to {dst}")
-        wget.download(enhanced_file_url, dst)
+    def _download_enhanced_file(self, enhanced_file_url, src, dst):
+        # <dst> includes the full path (including the filename)
+        if self._is_file(dst):
+            folder_path = os.path.dirname(dst)
+            file_name = os.path.basename(dst)
+
+        # <dst> includes the path (without the filename)
+        elif self._is_folder(dst):
+            folder_path = dst
+            file_name = self._get_default_dst_filename(src)
+
+        # <dst> is None, so we download to default path
+        else:
+            folder_path = self._get_default_dst_folder()
+            file_name = self._get_default_dst_filename(src)
+
+        Path(folder_path).mkdir(parents=True, exist_ok=True)
+        dst_path = os.path.join(folder_path, file_name)
+
+        self._logger.info(f"Downloading enhanced file to {dst_path}")
+        wget.download(enhanced_file_url, dst_path)
         print()  # An aesthetic linebreak
-        self._logger.info(f"{dst} was downloaded succesfully.")
+        self._logger.info(f"{dst_path} was downloaded succesfully.")
 
     def _upload_enhanced_file(self, enhanced_file_url, dst):
         raise NotImplementedError(f"Uploading enhanced file to {dst} - yet not supported.")
@@ -61,7 +79,7 @@ class AudioEnhancer(object):
             return False 
 
     def _is_file(self, path):
-        if path:
+        if path and not self._is_url(path):
             return os.path.splitext(path)[1] != ""
         else:
             return False 
@@ -71,6 +89,23 @@ class AudioEnhancer(object):
             return not self._is_file(path)
         else:
             return False 
+
+    def _handle_enhance_file_done(
+        self, src, no_download, dst, enhanced_file_url
+    ):
+        self._logger.info(f"Enhanced file URL is located at \
+            {enhanced_file_url}")
+
+        # Uploading enhanced file
+        if self._is_url(dst):
+            self._upload_enhanced_file(enhanced_file_url, dst)
+
+        # Downloading enhanced file
+        elif not no_download:
+            self._download_enhanced_file(enhanced_file_url, src, dst)
+
+    def _handle_enhance_file_failure(self, msg):
+        self._logger.error(f"Failure reason: {msg}")
 
     def enhance_file(self, src, no_download=False, dst=None, retention=None):
         """
@@ -134,7 +169,7 @@ class AudioEnhancer(object):
 
             # Check status
             prev_status = None
-            while True:
+            while not time.sleep(self._status_interval_sec):
                 ret_val = api.enhance_status(session_id)
                 status = ret_val["status"]
                 if status != prev_status:
@@ -144,53 +179,21 @@ class AudioEnhancer(object):
                 prev_status = status
 
                 if status == "done":
-                    enhanced_file_url = ret_val["url"]
-                    self._logger.info(
-                        f"Enhanced file URL is located at {enhanced_file_url}"
-                    )
+                    self._handle_enhance_file_done(src, no_download, dst, ret_val["url"])
                     break
+                elif status == "processing":
+                    # TODO: implement some progress-bar
+                    #self.__handle_enhance_file_processing()
+                    continue
                 elif status == "failure":
-                    failure_reason = ret_val["msg"]
-                    self._logger.error(f"Failure reason: {failure_reason}")
+                    self._handle_enhance_file_failure(ret_val["msg"])
                     break
-                else:
-                    time.sleep(self._status_interval_sec)
-
-            # Handle audio enhancement done
-            if status == "done":
-                
-                # Uploading enhanced file
-                if self._is_url(dst):
-                    self._upload_enhanced_file(enhanced_file_url, dst)
-                
-                # Downloading enhanced file
-                elif not no_download:
-                    folder_path = None
-                    file_name = None
-
-                    # <dst> includes the full path (including the filename)
-                    if self._is_file(dst):
-                        folder_path = os.path.split(dst)[0]
-                        file_name = os.path.split(dst)[1]
-                    
-                    # <dst> includes the path (without the filename)
-                    elif self._is_folder(dst):
-                        folder_path = dst
-                        file_name = self._get_default_dst_filename(src)
-                    
-                    # <dst> is None, so we download to default path
-                    else:
-                        folder_path = self._get_default_dst_folder()
-                        file_name = self._get_default_dst_filename(src)
-
-                    Path(folder_path).mkdir(parents=True, exist_ok=True)
-                    dst_path = os.path.join(folder_path, file_name)
-                    self._download_enhanced_file(enhanced_file_url, dst_path)
 
         except Exception as e:
             self._logger.error(e)
 
     # TODO: need to support this use-case
     def enhance_stream(
-            self, src_stream_type, src, dst, rate, chunksize):
+        self, src_stream_type, src, dst, rate, chunksize
+    ):
         raise NotImplementedError("'enhance_stream()' yet not supported.")
