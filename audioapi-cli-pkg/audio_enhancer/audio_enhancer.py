@@ -92,9 +92,10 @@ class AudioEnhancer(object):
         # Uploading enhanced file
         if self._is_url(dst):
             self._upload_enhanced_file(enhanced_file_url, dst)
+            return
 
         # Downloading enhanced file
-        elif not no_download:
+        if not no_download:
             self._download_enhanced_file(enhanced_file_url, src, dst)
 
     def _handle_enhance_file_failure(self, msg):
