@@ -2,8 +2,13 @@ import logging
 import sys
 import time
 import wget
+<<<<<<< HEAD
 from urllib.parse import urlparse
 from pathlib import Path, PurePath
+=======
+import os
+from urllib.parse import urlparse 
+>>>>>>> origin/develop
 from audioapi import audioapi
 
 DEFAULT_STATUS_INTERVAL_SEC = 1
