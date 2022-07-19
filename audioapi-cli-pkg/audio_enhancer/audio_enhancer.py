@@ -2,9 +2,8 @@ import logging
 import sys
 import time
 import wget
-import os
 from urllib.parse import urlparse
-from pathlib import Path
+from pathlib import Path, PurePath
 from audioapi import audioapi
 
 DEFAULT_STATUS_INTERVAL_SEC = 1
@@ -37,32 +36,32 @@ class AudioEnhancer(object):
         return DEFAULT_STATUS_INTERVAL_SEC
 
     def _get_default_dst_folder(self):
-        return os.getcwd()
+        return Path.cwd()
 
     def _get_default_dst_filename(self, src):
-        src_filename_with_ext = os.path.split(src)[1]
-        src_filename_not_ext = os.path.splitext(src_filename_with_ext)[0]
-        src_filename_ext = os.path.splitext(src_filename_with_ext)[1]     
-        return src_filename_not_ext + "_enhanced" + src_filename_ext[:4]
+        filename_no_suffix = PurePath(src).stem
+        suffix = PurePath(src).suffix[:4]    
+        return filename_no_suffix + "_enhanced" + suffix
 
     def _download_enhanced_file(self, enhanced_file_url, src, dst):
-        # <dst> includes the full path (including the filename)
-        if self._is_file(dst):
-            folder_path = os.path.dirname(dst)
-            file_name = os.path.basename(dst)
+        if dst:
+            # <dst> includes the full path (including the filename)
+            if self._is_file(dst):
+                dir = PurePath(dst).parent
+                filename = PurePath(dst).name
 
-        # <dst> includes the path (without the filename)
-        elif self._is_folder(dst):
-            folder_path = dst
-            file_name = self._get_default_dst_filename(src)
+            # <dst> includes only the directory (without the filename)
+            elif Path(dst).is_dir():
+                dir = dst
+                filename = self._get_default_dst_filename(src)
 
-        # <dst> is None, so we download to default path
+        # Use default path for download
         else:
-            folder_path = self._get_default_dst_folder()
-            file_name = self._get_default_dst_filename(src)
+            dir = self._get_default_dst_folder()
+            filename = self._get_default_dst_filename(src)
 
-        Path(folder_path).mkdir(parents=True, exist_ok=True)
-        dst_path = os.path.join(folder_path, file_name)
+        Path(dir).mkdir(parents=True, exist_ok=True)
+        dst_path = PurePath.joinpath(dir, filename)
 
         self._logger.info(f"Downloading enhanced file to {dst_path}")
         wget.download(enhanced_file_url, dst_path)
@@ -79,14 +78,8 @@ class AudioEnhancer(object):
             return False 
 
     def _is_file(self, path):
-        if path and not self._is_url(path):
-            return os.path.splitext(path)[1] != ""
-        else:
-            return False 
-
-    def _is_folder(self, path):
-        if path:
-            return not self._is_file(path)
+        if not self._is_url(path):
+            return PurePath(path).suffix != ""
         else:
             return False 
 
@@ -183,7 +176,7 @@ class AudioEnhancer(object):
                     break
                 elif status == "processing":
                     # TODO: implement some progress-bar
-                    #self.__handle_enhance_file_processing()
+                    #self._handle_enhance_file_processing()
                     continue
                 elif status == "failure":
                     self._handle_enhance_file_failure(ret_val["msg"])
