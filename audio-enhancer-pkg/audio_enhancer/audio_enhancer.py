@@ -65,7 +65,7 @@ class AudioEnhancer(object):
         dst_path = PurePath.joinpath(dir, filename)
 
         self._logger.info(f"Downloading enhanced file to {dst_path}")
-        wget.download(enhanced_file_url, dst_path)
+        wget.download(enhanced_file_url, str(dst_path))
         print()  # An aesthetic linebreak
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 

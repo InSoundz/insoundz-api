@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='audio-enhancer',  
     version='0.0.1',
-    description="A simple wrapper for Insoundz Audio API tool for audio enhancement",
+    description="A wrapper for the audioapi client to produce audio enhancement",
     readme = "README.md",
     license_files = ('LICENSE',),
     python_requires=">=3.7",

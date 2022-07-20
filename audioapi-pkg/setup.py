@@ -3,10 +3,13 @@ from setuptools import setup, find_packages
 setup(
     name='audioapi',  
     version='0.0.1',
-    description="A simple pythonic client to access Insoundz AudioAPI for audio enhancement",
+    description="A basic and simple implementation of a pythonic audioapi client to access Insoundz AudioAPI",
     readme = "README.md",
     license_files=('LICENSE',),
     python_requires=">=3.7",
     packages=find_packages(),
-    install_requires=['websockets', 'requests'],
+    install_requires=[
+                        'websockets', 
+                        'requests'
+    ],
  )

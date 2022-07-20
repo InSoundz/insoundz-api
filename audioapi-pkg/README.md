@@ -1,5 +1,5 @@
 <h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; audioapi Package</h1>
-A simple pythonic client to access Insoundz AudioAPI for audio enhancement.
+A basic and simple implementation of a pythonic audioapi client to access Insoundz AudioAPI.
 <br />
 <br />
 
