@@ -11,11 +11,11 @@ pip install audioapi-cli
 
 ## Help
 | Command       | Description   | 
-| ------------- |:-------------:|
-| enhance-file | Sends an audio file (by URL or local path) to Insoundz AudioAPI and receives an enhanced audio file. |
+| ------------- |:-------------|
+| enhance-file | Sends an audio file (by URL or local path) to Insoundz AudioAPI and receives an enhanced audio file |
 | enhance-stream | TBD |
 
-### enhance-file 
+### Command: enhance-file 
 
 | Argument                          | Description   | Required | Default |
 | -------------------------------- |:-------------|:-------------:|:-------------|
@@ -28,6 +28,9 @@ pip install audioapi-cli
 | status-interval | Check the audio enhancement process every <status-interval> [seconds] | No | 1 second|
 
 ## Getting started
+```console
+audioapi_cli <command> <arg1> <arg2> ...
+```
 
 ### Example #1:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "<local_path>/example_enhanced.wav").
