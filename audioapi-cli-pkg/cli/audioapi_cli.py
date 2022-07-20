@@ -57,7 +57,7 @@ def enhance_stream(
 @click.option(
     "--api-token",
     type=str,
-    help="Authentication key to access the AudioAPI service",
+    help="Authentication key to access Insoundz AudioAPI services",
     prompt="API token",
     required=True,
 )
@@ -85,7 +85,7 @@ def enhance_stream(
     type=str,
     help=f"A URL to upload the enhanced file or \
             a local path to download the enhanced file \
-            [default: <local_path>/<original_filename>_enhanced.wav]",
+            [default: <local_path>/<original_filename>_enhanced.<original_suffix>]",
 )
 @click.option("--retention", type=str, help="URL Retention duration [minutes]")
 @click.option(
