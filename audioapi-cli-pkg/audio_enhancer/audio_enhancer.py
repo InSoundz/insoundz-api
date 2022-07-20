@@ -39,9 +39,10 @@ class AudioEnhancer(object):
         return Path.cwd()
 
     def _get_default_dst_filename(self, src):
-        filename_no_suffix = PurePath(src).stem
-        suffix = PurePath(src).suffix[:4]    
-        return filename_no_suffix + "_enhanced" + suffix
+        src_filename = wget.detect_filename(src)
+        src_filename_no_suffix = PurePath(src_filename).stem
+        src_filename_suffix = PurePath(src_filename).suffix
+        return src_filename_no_suffix + "_enhanced" + src_filename_suffix
 
     def _download_enhanced_file(self, enhanced_file_url, src, dst):
         if dst:
