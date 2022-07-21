@@ -23,7 +23,7 @@ pip install audioapi-cli
 | endpoint-url    | Use an alternative endpoint URL (without the 'http://' prefix) | No | api.insoundz.io |
 | src             | A URL or a local path of the original audio file | Yes | None |
 | no-download     | If set, the enhanced file won't be downloaded to the local machine (we'll get only the URL of the enhanced file) | No | False|
-| dst             | A URL to upload the enhanced file or a local path to download the enhanced file | No | <local_path>/<original_filename>_enhanced.<original_suffix> |
+| dst             | A URL to upload the enhanced file or a local path to download the enhanced file | No | <current_path>/<original_filename>_enhanced.<original_suffix> |
 | retention | URL Retention duration [minutes] | No | None |
 | status-interval | Check the audio enhancement process every <status-interval> [seconds] | No | 1 second|
 
@@ -33,7 +33,7 @@ audioapi_cli <command> <arg1> <arg2> ...
 ```
 
 ### Example #1:
-Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "<local_path>/example_enhanced.wav").
+Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "<current_path>/example_enhanced.wav").
 ```console
 audioapi_cli enhance-file --api-token="my-key" --src="/home/example_user/my_audio_files/example.wav"
 ```
