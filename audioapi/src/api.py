@@ -1,12 +1,15 @@
 import requests
 from urllib.parse import urlencode, urlunsplit
-import websockets
 import logging
 
 DEFAULT_ENDPOINT_URL = "api.insoundz.io"
 
 
 class AudioAPI(object):
+    """
+    A basic and a simple class implementation of an audioapi client
+    to access InSoundz AudioAPI.
+    """
     def __init__(
             self,
             api_token,
@@ -75,24 +78,3 @@ class AudioAPI(object):
 
         response = requests.get(url, headers=self._headers)
         return self._parse_response(response)
-
-    def enhance_websocket(self, sample_rate, file_type):
-        """
-        Returns a websocket connection.
-
-        :param str sample_rate: Sample rate of the original file or stream
-                                (measured in [hz]).
-        :param str file_type:   Should be the file type ('wav', 'mp3' etc).
-        :return:                A websocket connection.
-        :rtype:                 A websocket connection object
-        """
-        parameters = {"sampleRate": sample_rate, "fileType": file_type}
-        query = urlencode(query=parameters, doseq=True)
-        uri = urlunsplit(("wss", self._endpoint_url, "/enhance", query, ""))
-
-        try:
-            conn = websockets.connect(uri)
-        except Exception as e:
-            self._logger.exception(e)
-
-        return conn
