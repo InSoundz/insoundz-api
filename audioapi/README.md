@@ -1,4 +1,4 @@
-<h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; audio-enhancer Package</h1>
+<h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; audioapi Package</h1>
 InSoundz audioapi client implementation to produce audio enhancement.
 <br />
 <br />
@@ -6,14 +6,14 @@ InSoundz audioapi client implementation to produce audio enhancement.
 ## Installation
 - Please make sure you are running python3.7 or later.
 ```console
-pip install audio-enhancer
+pip install audioapi
 ```
 
 ## Getting started: Audio file enhancement
 Sending the URL of the original file for audio enhancement processing and download the enhanced file to our local machine.
 
 ```python
-from audio_enhancer.audio_enhancer import AudioEnhancer
+from audioapi.enhancer import AudioEnhancer
 
 enhancer = AudioEnhancer(api_token="my_key")
 enhancer.enhance_file(

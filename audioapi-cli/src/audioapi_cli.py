@@ -34,23 +34,21 @@ def audioapi_cli():
 @click.option(
     "--no-download",
     is_flag=True,
-    help="If set, the enhanced file won't be downloaded to the local machine \
-            (we'll get only the URL of the enhanced file)",
+    help="If set, the enhanced file won't be downloaded to the local machine "
+         "(we'll get only the URL of the enhanced file)",
 )
 @click.option(
     "--dst",
     type=str,
-    help=f"A URL to upload the enhanced file or \
-            a local path to download the enhanced file \
-            [default: \
-            <current_path>/<original_filename>_enhanced.<original_suffix>]",
+    help=f"A URL to upload the enhanced file or a local path to download the "
+          "enhanced file [default: "
+          "<current_path>/<original_filename>_enhanced.<original_suffix>]",
 )
 @click.option("--retention", type=str, help="URL Retention duration [minutes]")
 @click.option(
     "--status-interval",
     type=int,
-    help="Check the audio enhancement process \
-            every <status-interval> [seconds]",
+    help="Check the enhancement process every <status-interval> [seconds]",
     default=AudioEnhancer.get_default_status_interval(),
 )
 def enhance_file(

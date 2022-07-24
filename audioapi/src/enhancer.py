@@ -15,7 +15,7 @@ class AudioEnhancer(object):
     """
     def __init__(
         self,
-        api_token, endpoint_url,
+        api_token, endpoint_url=AudioAPI.get_default_endpoint_url(),
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
