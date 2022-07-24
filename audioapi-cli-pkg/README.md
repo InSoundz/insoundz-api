@@ -1,5 +1,5 @@
 <h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; audioapi-cli Package</h1>
-A simple CLI which is used to give the client an easy and fast access to Insoundz AudioAPI.
+A simple CLI which is used to give the client an easy and fast access to InSoundz AudioAPI.
 <br />
 <br />
 
@@ -12,14 +12,14 @@ pip install audioapi-cli
 ## Help
 | Command       | Description   | 
 | ------------- |:-------------|
-| enhance-file | Sends an audio file (by URL or local path) to Insoundz AudioAPI and receives an enhanced audio file |
+| enhance-file | Sends an audio file (by URL or local path) to InSoundz AudioAPI and receives an enhanced audio file |
 | enhance-stream | TBD |
 
 ### Command: enhance-file 
 
 | Argument                          | Description   | Required | Default |
 | -------------------------------- |:-------------|:-------------:|:-------------|
-| api-token       | Authentication key to access Insoundz AudioAPI services | Yes | None |
+| api-token       | Authentication key to access InSoundz AudioAPI services | Yes | None |
 | endpoint-url    | Use an alternative endpoint URL (without the 'http://' prefix) | No | api.insoundz.io |
 | src             | A URL or a local path of the original audio file | Yes | None |
 | no-download     | If set, the enhanced file won't be downloaded to the local machine (we'll get only the URL of the enhanced file) | No | False|

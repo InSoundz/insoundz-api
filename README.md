@@ -4,15 +4,11 @@ The AudioAPI library includes a number of packages as described below.
 <br />
 
 ## audioapi Package
-A basic and simple implementation of a pythonic audioapi client to access Insoundz AudioAPI.
-<br />
-
-## audio-enhancer Package
-A wrapper for the audioapi client to produce audio enhancement (based uppon the audioapi package).
+InSoundz audioapi client implementation to produce audio enhancement.
 <br />
 
 ## audioapi-cli Package
-A simple CLI which is used to give the client an easy and fast access to Insoundz AudioAPI (based uppon the audio-enhancer package).
+A simple CLI which is used to give the client an easy and fast access to InSoundz AudioAPI (based uppon the audioapi package).
 <br />
 <br />
 

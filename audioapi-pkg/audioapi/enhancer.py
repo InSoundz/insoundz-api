@@ -4,12 +4,16 @@ import time
 import wget
 from urllib.parse import urlparse
 from pathlib import Path, PurePath
-from audioapi import audioapi
+from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 1
 
 
 class AudioEnhancer(object):
+    """
+    A wrapper for the audioapi client to produce audio enhancement.
+    """
+    
     def __init__(
         self,
         api_token, endpoint_url,
@@ -147,7 +151,7 @@ class AudioEnhancer(object):
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
-        api = audioapi.AudioAPI(**kwargsNotNone)
+        api = api.AudioAPI(**kwargsNotNone)
 
         try:
             if self._is_url(src):

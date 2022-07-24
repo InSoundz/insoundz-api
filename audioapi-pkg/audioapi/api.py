@@ -7,6 +7,10 @@ DEFAULT_ENDPOINT_URL = "api.insoundz.io"
 
 
 class AudioAPI(object):
+    """
+    A basic and a simple class implementation of an audioapi client to access InSoundz AudioAPI.
+    """
+    
     def __init__(
             self,
             api_token,

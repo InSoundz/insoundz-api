@@ -2,8 +2,8 @@
 
 import click
 import asyncio
-from audio_enhancer.audio_enhancer import AudioEnhancer
-from audioapi import audioapi as api
+from audioapi.enhancer import AudioEnhancer
+from audioapi.api import AudioAPI
 
 
 @click.group()
@@ -23,7 +23,7 @@ def audioapi_cli():
     "--endpoint-url",
     type=str,
     help="Use an alternative endpoint URL (without the 'wss://' prefix)",
-    default=api.AudioAPI.get_default_endpoint_url(),
+    default=AudioAPI.get_default_endpoint_url(),
 )
 @click.option(
     "--src",
@@ -57,7 +57,7 @@ def enhance_stream(
 @click.option(
     "--api-token",
     type=str,
-    help="Authentication key to access Insoundz AudioAPI services",
+    help="Authentication key to access InSoundz AudioAPI services",
     prompt="API token",
     required=True,
 )
@@ -65,7 +65,7 @@ def enhance_stream(
     "--endpoint-url",
     type=str,
     help="Use an alternative endpoint URL (without the 'http://' prefix)",
-    default=api.AudioAPI.get_default_endpoint_url(),
+    default=AudioAPI.get_default_endpoint_url(),
 )
 @click.option(
     "--src",
