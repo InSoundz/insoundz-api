@@ -2,8 +2,8 @@
 
 import click
 import asyncio
-from audioapi.enhancer import AudioEnhancer
 from audioapi.api import AudioAPI
+from audioapi.enhancer import AudioEnhancer
 
 
 @click.group()

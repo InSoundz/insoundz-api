@@ -7,7 +7,8 @@ setup(
     readme = "README.md",
     license_files=('LICENSE',),
     python_requires=">=3.7",
-    packages=find_packages(),
+    package_dir={"audioapi": "src"},
+    packages=['audioapi'],
     install_requires=[
                         'websockets', 
                         'requests',
