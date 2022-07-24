@@ -2,8 +2,9 @@
 The AudioAPI library includes the audioapi package and the audioapi-cli package as described below.
 <br />
 <br />
+<br />
 
-## audioapi-cli Package
+# audioapi-cli Package
 A simple CLI which is used to give the client an easy and fast access to InSoundz AudioAPI (based uppon the audioapi package).
 <br />
 
@@ -12,7 +13,7 @@ A simple CLI which is used to give the client an easy and fast access to InSound
 <br />
 <br />
 
-## audioapi Package
+# audioapi Package
 InSoundz audioapi client implementation to produce audio enhancement.
 <br />
 
