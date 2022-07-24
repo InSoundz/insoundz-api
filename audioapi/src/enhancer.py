@@ -4,15 +4,18 @@ import time
 import wget
 from urllib.parse import urlparse
 from pathlib import Path, PurePath
-from audioapi import audioapi
+from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 1
 
 
 class AudioEnhancer(object):
+    """
+    A wrapper for the audioapi client to produce audio enhancement.
+    """
     def __init__(
         self,
-        api_token, endpoint_url,
+        api_token, endpoint_url=AudioAPI.get_default_endpoint_url(),
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
@@ -65,7 +68,7 @@ class AudioEnhancer(object):
         dst_path = PurePath.joinpath(dir, filename)
 
         self._logger.info(f"Downloading enhanced file to {dst_path}")
-        wget.download(enhanced_file_url, dst_path)
+        wget.download(enhanced_file_url, str(dst_path))
         print()  # An aesthetic linebreak
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 
@@ -76,13 +79,13 @@ class AudioEnhancer(object):
         if path:
             return urlparse(path).scheme != ""
         else:
-            return False 
+            return False
 
     def _is_file(self, path):
         if not self._is_url(path):
             return PurePath(path).suffix != ""
         else:
-            return False 
+            return False
 
     def _handle_enhance_file_done(
         self, src, no_download, dst, enhanced_file_url
@@ -147,7 +150,7 @@ class AudioEnhancer(object):
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
-        api = audioapi.AudioAPI(**kwargsNotNone)
+        api = AudioAPI(**kwargsNotNone)
 
         try:
             if self._is_url(src):
@@ -174,11 +177,13 @@ class AudioEnhancer(object):
                 prev_status = status
 
                 if status == "done":
-                    self._handle_enhance_file_done(src, no_download, dst, ret_val["url"])
+                    self._handle_enhance_file_done(
+                        src, no_download, dst, ret_val["url"]
+                    )
                     break
                 elif status == "processing":
                     # TODO: implement some progress-bar
-                    #self._handle_enhance_file_processing()
+                    # self._handle_enhance_file_processing()
                     continue
                 elif status == "failure":
                     self._handle_enhance_file_failure(ret_val["msg"])
@@ -186,9 +191,3 @@ class AudioEnhancer(object):
 
         except Exception as e:
             self._logger.error(e)
-
-    # TODO: need to support this use-case
-    def enhance_stream(
-        self, src_stream_type, src, dst, rate, chunksize
-    ):
-        raise NotImplementedError("'enhance_stream()' yet not supported.")
