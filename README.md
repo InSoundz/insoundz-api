@@ -13,4 +13,4 @@ A simple CLI which is used to give the client an easy and fast access to InSound
 <br />
 
 ## Installation and Getting started
-[See instructions here.](audioapi-cli-pkg/README.md)
+[See instructions here.](audioapi-cli/README.md)
