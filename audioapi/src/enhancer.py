@@ -150,7 +150,7 @@ class AudioEnhancer(object):
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
-        api = api.AudioAPI(**kwargsNotNone)
+        api = AudioAPI(**kwargsNotNone)
 
         try:
             if self._is_url(src):
