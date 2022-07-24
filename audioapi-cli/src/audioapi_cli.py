@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import click
-import asyncio
 from audioapi.api import AudioAPI
 from audioapi.enhancer import AudioEnhancer
 
@@ -9,48 +8,6 @@ from audioapi.enhancer import AudioEnhancer
 @click.group()
 def audioapi_cli():
     pass
-
-
-@click.command("enhance-stream", context_settings={"show_default": True})
-@click.option(
-    "--api-token",
-    type=str,
-    help="Authentication key to access the AudioAPI service",
-    prompt="API token",
-    required=True,
-)
-@click.option(
-    "--endpoint-url",
-    type=str,
-    help="Use an alternative endpoint URL (without the 'wss://' prefix)",
-    default=AudioAPI.get_default_endpoint_url(),
-)
-@click.option(
-    "--src",
-    type=str,
-    help="A URL or a local path of the original audio file",
-    prompt="src",
-    required=True,
-)
-@click.option(
-    "--dst",
-    type=str,
-    help=f"A URL to upload the enhanced file or \
-            a local path to download the enhanced file \
-            [default: <current_path>/<original_filename>_enhanced.wav]",
-)
-@click.option(
-    "--sample-rate",
-    type=click.Choice(["16000", "48000"]),
-    default="48000",
-    help="Audio rate",
-)
-@click.option("--chunksize", type=int, default=32768, help="[bytes]")
-def enhance_stream(
-    api_token, endpoint_url, src, dst, sample_rate, chunksize
-):
-    enhancer = AudioEnhancer(api_token, endpoint_url)
-    enhancer.enhance_stream(src, dst, sample_rate, chunksize)
 
 
 @click.command("enhance-file", context_settings={"show_default": True})
@@ -104,7 +61,6 @@ def enhance_file(
 
 
 audioapi_cli.add_command(enhance_file)
-audioapi_cli.add_command(enhance_stream)
 
 if __name__ == "__main__":
     audioapi_cli()

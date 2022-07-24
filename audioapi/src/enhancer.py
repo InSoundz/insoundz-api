@@ -190,9 +190,3 @@ class AudioEnhancer(object):
 
         except Exception as e:
             self._logger.error(e)
-
-    # TODO: need to support this use-case
-    def enhance_stream(
-        self, src_stream_type, src, dst, rate, chunksize
-    ):
-        raise NotImplementedError("'enhance_stream()' yet not supported.")

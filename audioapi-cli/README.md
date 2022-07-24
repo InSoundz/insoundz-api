@@ -13,7 +13,6 @@ pip install audioapi-cli
 | Command       | Description   | 
 | ------------- |:-------------|
 | enhance-file | Sends an audio file (by URL or local path) to InSoundz AudioAPI and receives an enhanced audio file |
-| enhance-stream | TBD |
 
 ### Command: enhance-file 
 

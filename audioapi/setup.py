@@ -10,7 +10,6 @@ setup(
     package_dir={"audioapi": "src"},
     packages=['audioapi'],
     install_requires=[
-                        'websockets', 
                         'requests',
                         'wget'
     ],
