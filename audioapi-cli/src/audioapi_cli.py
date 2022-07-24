@@ -42,7 +42,8 @@ def audioapi_cli():
     type=str,
     help=f"A URL to upload the enhanced file or \
             a local path to download the enhanced file \
-            [default: <current_path>/<original_filename>_enhanced.<original_suffix>]",
+            [default: \
+            <current_path>/<original_filename>_enhanced.<original_suffix>]",
 )
 @click.option("--retention", type=str, help="URL Retention duration [minutes]")
 @click.option(
@@ -58,7 +59,6 @@ def enhance_file(
 ):
     enhancer = AudioEnhancer(api_token, endpoint_url, status_interval)
     enhancer.enhance_file(src, no_download, dst, retention)
-
 
 audioapi_cli.add_command(enhance_file)
 

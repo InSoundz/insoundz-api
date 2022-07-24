@@ -1,5 +1,5 @@
 <h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; AudioAPI Library</h1>
-The AudioAPI library includes a number of packages as described below.
+The AudioAPI library includes the audioapi package and the audioapi-cli package as described below.
 <br />
 <br />
 

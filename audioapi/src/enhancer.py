@@ -13,7 +13,6 @@ class AudioEnhancer(object):
     """
     A wrapper for the audioapi client to produce audio enhancement.
     """
-    
     def __init__(
         self,
         api_token, endpoint_url,
@@ -80,13 +79,13 @@ class AudioEnhancer(object):
         if path:
             return urlparse(path).scheme != ""
         else:
-            return False 
+            return False
 
     def _is_file(self, path):
         if not self._is_url(path):
             return PurePath(path).suffix != ""
         else:
-            return False 
+            return False
 
     def _handle_enhance_file_done(
         self, src, no_download, dst, enhanced_file_url
@@ -178,11 +177,13 @@ class AudioEnhancer(object):
                 prev_status = status
 
                 if status == "done":
-                    self._handle_enhance_file_done(src, no_download, dst, ret_val["url"])
+                    self._handle_enhance_file_done(
+                        src, no_download, dst, ret_val["url"]
+                    )
                     break
                 elif status == "processing":
                     # TODO: implement some progress-bar
-                    #self._handle_enhance_file_processing()
+                    # self._handle_enhance_file_processing()
                     continue
                 elif status == "failure":
                     self._handle_enhance_file_failure(ret_val["msg"])
