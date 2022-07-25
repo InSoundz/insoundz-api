@@ -12,6 +12,7 @@ setup(
     packages=['audioapi'],
     install_requires=[
                         'requests',
-                        'wget'
+                        'wget',
+                        'halo'
     ],
  )

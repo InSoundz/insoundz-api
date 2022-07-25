@@ -4,6 +4,7 @@ import time
 import wget
 from urllib.parse import urlparse
 from pathlib import Path, PurePath
+from halo import Halo
 from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 1
@@ -22,6 +23,7 @@ class AudioEnhancer(object):
         self._api_token = api_token
         self._endpoint_url = endpoint_url
         self._status_interval_sec = status_interval_sec
+        self._spinner = Halo(spinner='dots', color='magenta', placement='right')
 
     def _initialize_logger(self, logger_name):
         logger = logging.getLogger(logger_name)
@@ -33,6 +35,16 @@ class AudioEnhancer(object):
         stdout_handler.setFormatter(formatter)
         logger.addHandler(stdout_handler)
         return logger
+
+    def _update_job_done(self, prev_status, status):
+        if prev_status:
+            if status == "failure":
+                self._spinner.fail()
+            else:
+                self._spinner.succeed()
+
+    def _progress_text(self, session_id, status):
+        return f"Session ID [{session_id}] job status [{status}]: "
 
     @staticmethod
     def get_default_status_interval():
@@ -90,8 +102,9 @@ class AudioEnhancer(object):
     def _handle_enhance_file_done(
         self, src, no_download, dst, enhanced_file_url
     ):
-        self._logger.info(f"Enhanced file URL is located at \
-            {enhanced_file_url}")
+        self._spinner.stop()
+        self._logger.info(f"Enhanced file URL is located at "
+                           "{enhanced_file_url}")
 
         # Uploading enhanced file
         if self._is_url(dst):
@@ -103,6 +116,7 @@ class AudioEnhancer(object):
             self._download_enhanced_file(enhanced_file_url, src, dst)
 
     def _handle_enhance_file_failure(self, msg):
+        self._spinner.stop()
         self._logger.error(f"Failure reason: {msg}")
 
     def enhance_file(self, src, no_download=False, dst=None, retention=None):
@@ -171,23 +185,22 @@ class AudioEnhancer(object):
                 ret_val = api.enhance_status(session_id)
                 status = ret_val["status"]
                 if status != prev_status:
-                    self._logger.info(
-                        f"Session ID [{session_id}] job status [{status}]."
+                    self._update_job_done(prev_status, status)
+                    self._spinner.start(
+                        text=self._progress_text(session_id, status),
                     )
-                prev_status = status
 
                 if status == "done":
                     self._handle_enhance_file_done(
                         src, no_download, dst, ret_val["url"]
                     )
                     break
-                elif status == "processing":
-                    # TODO: implement some progress-bar
-                    # self._handle_enhance_file_processing()
-                    continue
                 elif status == "failure":
                     self._handle_enhance_file_failure(ret_val["msg"])
                     break
 
+                prev_status = status
+
         except Exception as e:
             self._logger.error(e)
+            self._spinner.stop()
