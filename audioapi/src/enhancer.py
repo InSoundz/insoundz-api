@@ -45,7 +45,7 @@ class AudioEnhancer(object):
 
     def _progress_text(self, session_id, status, start_time):
         sec_counter = int(time.time() - start_time)
-        return f"Session ID [{session_id}]; job status [{status}]; elapsed time [{sec_counter} sec]  "
+        return f"Session ID [{session_id}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
 
     @staticmethod
     def get_default_status_interval():
