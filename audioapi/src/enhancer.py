@@ -117,7 +117,6 @@ class AudioEnhancer(object):
             self._download_enhanced_file(enhanced_file_url, src, dst)
 
     def _handle_enhance_file_failure(self, msg, response):
-        self._spinner.fail()
         self._logger.error(f"Failure reason: {msg}")
         response.raise_for_status()
 
@@ -125,7 +124,9 @@ class AudioEnhancer(object):
         if key in response.json().keys():
             return response.json()[key]
         else:
+            self._spinner.fail()
             self._handle_enhance_file_failure(response.json()["message"], response)
+            raise f"Invalid key: {key}"
 
     def enhance_file(self, src, no_download=False, dst=None, retention=None):
         """
@@ -205,7 +206,7 @@ class AudioEnhancer(object):
                     msg = self._get_key_from_response("msg", response)
                     self._handle_enhance_file_failure(msg, response)
                     break
-                
+
                 self._spinner.start(
                     text=self._progress_text(session_id, status, start_time)
                 )    
