@@ -1,5 +1,5 @@
 import requests
-from urllib.parse import urlencode, urlunsplit
+from urllib.parse import urlunsplit
 import logging
 
 DEFAULT_ENDPOINT_URL = "api.insoundz.io"
@@ -27,10 +27,6 @@ class AudioAPI(object):
             "Accept": "application/json"
         }
 
-    def _parse_response(self, response):
-        response.raise_for_status()
-        return response.json()
-
     @staticmethod
     def get_default_endpoint_url():
         return DEFAULT_ENDPOINT_URL
@@ -55,8 +51,7 @@ class AudioAPI(object):
         if retention:
             data["retention"] = retention
 
-        response = requests.post(url, headers=self._headers, json=data)
-        return self._parse_response(response)
+        return requests.post(url, headers=self._headers, json=data)
 
     def enhance_status(self, session_id):
         """
@@ -76,5 +71,4 @@ class AudioAPI(object):
         url = urlunsplit(('https', self._endpoint_url,
                          f'enhance/{session_id}', '', ''))
 
-        response = requests.get(url, headers=self._headers)
-        return self._parse_response(response)
+        return requests.get(url, headers=self._headers)
