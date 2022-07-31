@@ -7,7 +7,7 @@ from pathlib import Path, PurePath
 from halo import Halo
 from audioapi.api import AudioAPI
 
-DEFAULT_STATUS_INTERVAL_SEC = 1
+DEFAULT_STATUS_INTERVAL_SEC = 0.5
 
 
 class AudioEnhancer(object):
@@ -43,8 +43,9 @@ class AudioEnhancer(object):
             else:
                 self._spinner.succeed()
 
-    def _progress_text(self, session_id, status):
-        return f"Session ID [{session_id}] job status [{status}]: "
+    def _progress_text(self, session_id, status, start_time):
+        sec_counter = int(time.time() - start_time)
+        return f"Session ID [{session_id}]; job status [{status}]; elapsed time [{sec_counter} sec]  "
 
     @staticmethod
     def get_default_status_interval():
@@ -115,9 +116,16 @@ class AudioEnhancer(object):
         if not no_download:
             self._download_enhanced_file(enhanced_file_url, src, dst)
 
-    def _handle_enhance_file_failure(self, msg):
-        self._spinner.stop()
+    def _handle_enhance_file_failure(self, msg, response):
+        self._spinner.fail()
         self._logger.error(f"Failure reason: {msg}")
+        response.raise_for_status()
+
+    def _get_key_from_response(self, key, response):
+        if key in response.json().keys():
+            return response.json()[key]
+        else:
+            self._handle_enhance_file_failure(response.json()["message"], response)
 
     def enhance_file(self, src, no_download=False, dst=None, retention=None):
         """
@@ -176,28 +184,31 @@ class AudioEnhancer(object):
 
             # Send original file to AudioAPI
             self._logger.info(f"Sending {src_url} to AudioAPI for processing.")
-            ret_val = api.enhance_file(src_url, retention)
-            session_id = ret_val["session_id"]
+            response = api.enhance_file(src_url, retention)
+            session_id = self._get_key_from_response("session_id", response)
 
             # Check status
             prev_status = None
             while not time.sleep(self._status_interval_sec):
-                ret_val = api.enhance_status(session_id)
-                status = ret_val["status"]
+                response = api.enhance_status(session_id)
+                status = self._get_key_from_response("status", response)
+                
                 if status != prev_status:
                     self._update_job_done(prev_status, status)
-                    self._spinner.start(
-                        text=self._progress_text(session_id, status),
-                    )
+                    start_time = time.time()              
 
                 if status == "done":
-                    self._handle_enhance_file_done(
-                        src, no_download, dst, ret_val["url"]
-                    )
+                    url = self._get_key_from_response("url", response)
+                    self._handle_enhance_file_done(src, no_download, dst, url)
                     break
                 elif status == "failure":
-                    self._handle_enhance_file_failure(ret_val["msg"])
+                    msg = self._get_key_from_response("msg", response)
+                    self._handle_enhance_file_failure(msg, response)
                     break
+                
+                self._spinner.start(
+                    text=self._progress_text(session_id, status, start_time)
+                )    
 
                 prev_status = status
 
