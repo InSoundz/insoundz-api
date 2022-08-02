@@ -2,9 +2,10 @@ import logging
 import sys
 import time
 import wget
-from urllib.parse import urlparse
+import asyncio
 from pathlib import Path, PurePath
 from halo import Halo
+from audioapi.helpers import *
 from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
@@ -63,7 +64,7 @@ class AudioEnhancer(object):
     def _download_enhanced_file(self, enhanced_file_url, src, dst):
         if dst:
             # <dst> includes the full path (including the filename)
-            if self._is_file(dst):
+            if is_file(dst):
                 dir = PurePath(dst).parent
                 filename = PurePath(dst).name
 
@@ -81,34 +82,23 @@ class AudioEnhancer(object):
         dst_path = PurePath.joinpath(dir, filename)
 
         self._logger.info(f"Downloading enhanced file to {dst_path}")
-        wget.download(enhanced_file_url, str(dst_path))
-        print()  # An aesthetic linebreak
+        asyncio.run(download_file(enhanced_file_url, str(dst_path)))
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 
     def _upload_enhanced_file(self, enhanced_file_url, dst):
-        raise NotImplementedError(f"Uploading enhanced file to {dst} - yet not supported.")
-
-    def _is_url(self, path):
-        if path:
-            return urlparse(path).scheme != ""
-        else:
-            return False
-
-    def _is_file(self, path):
-        if not self._is_url(path):
-            return PurePath(path).suffix != ""
-        else:
-            return False
+        self._logger.info(f"Uploading enhanced file to {dst}")
+        asyncio.run(upload_from_url(enhanced_file_url, dst))
+        self._logger.info(f"Enhanced file was uploaded succesfully.")
 
     def _handle_enhance_file_done(
         self, src, no_download, dst, enhanced_file_url
     ):
         self._spinner.stop()
         self._logger.info(f"Enhanced file URL is located at "
-                           "{enhanced_file_url}")
+                          f"{enhanced_file_url}")
 
         # Uploading enhanced file
-        if self._is_url(dst):
+        if is_url(dst):
             self._upload_enhanced_file(enhanced_file_url, dst)
             return
 
@@ -126,7 +116,50 @@ class AudioEnhancer(object):
         else:
             self._spinner.fail()
             self._handle_enhance_file_failure(response.json()["message"], response)
-            raise f"Invalid key: {key}"
+            raise f"Invalid key: {key}"   
+
+    def _enhancement_start(self, api, src, retention):
+        self._logger.info(f"Sending a request to AudioAPI to enhance {src}.")
+
+        # Source file is on remote
+        if is_url(src):  
+            response = api.enhance_file(src, retention)
+            session_id = self._get_key_from_response("session_id", response)
+
+        # Source file is on the local machine
+        else:
+            response = api.enhance_upload()
+            session_id = self._get_key_from_response("session_id", response)
+            src_url = self._get_key_from_response("upload_url", response)
+            self._logger.info(f"Uploading {src} to AudioAPI for processing.")
+            upload_from_file(src, src_url)
+
+        return session_id
+
+    def _enhancement_wait_till_done(self, api, session_id, src, no_download, dst):
+        prev_status = None
+        while not time.sleep(self._status_interval_sec):
+            response = api.enhance_status(session_id)
+            status = self._get_key_from_response("status", response)
+            
+            if status != prev_status:
+                self._update_job_done(prev_status, status)
+                start_time = time.time()              
+
+            if status == "done":
+                url = self._get_key_from_response("url", response)
+                self._handle_enhance_file_done(src, no_download, dst, url)
+                break
+            elif status == "failure":
+                msg = self._get_key_from_response("msg", response)
+                self._handle_enhance_file_failure(msg, response)
+                break
+
+            self._spinner.start(
+                text=self._progress_text(session_id, status, start_time)
+            )    
+
+            prev_status = status
 
     def enhance_file(self, src, no_download=False, dst=None, retention=None):
         """
@@ -176,42 +209,8 @@ class AudioEnhancer(object):
         api = AudioAPI(**kwargsNotNone)
 
         try:
-            if self._is_url(src):
-                src_url = src
-            else:
-                # Send to /enhance a request to upload.
-                # The last should return a URL to upload to.
-                raise NotImplementedError("/enhance request to upload yet not supported.")
-
-            # Send original file to AudioAPI
-            self._logger.info(f"Sending {src_url} to AudioAPI for processing.")
-            response = api.enhance_file(src_url, retention)
-            session_id = self._get_key_from_response("session_id", response)
-
-            # Check status
-            prev_status = None
-            while not time.sleep(self._status_interval_sec):
-                response = api.enhance_status(session_id)
-                status = self._get_key_from_response("status", response)
-                
-                if status != prev_status:
-                    self._update_job_done(prev_status, status)
-                    start_time = time.time()              
-
-                if status == "done":
-                    url = self._get_key_from_response("url", response)
-                    self._handle_enhance_file_done(src, no_download, dst, url)
-                    break
-                elif status == "failure":
-                    msg = self._get_key_from_response("msg", response)
-                    self._handle_enhance_file_failure(msg, response)
-                    break
-
-                self._spinner.start(
-                    text=self._progress_text(session_id, status, start_time)
-                )    
-
-                prev_status = status
+            session_id = self._enhancement_start(api, src, retention)
+            self._enhancement_wait_till_done(api, session_id, src, no_download, dst)
 
         except Exception as e:
             self._logger.error(e)
