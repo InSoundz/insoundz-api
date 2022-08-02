@@ -20,6 +20,16 @@ def is_file(path):
     else:
         return False
 
+async def file_sender(file_name=None, chunk_size=65536):
+    file_size = os.path.getsize(file_name)
+    chunks = max(1, int(math.ceil(file_size / chunk_size)))
+    progress = tqdm(desc=f"Uploading", total=file_size, unit="B", unit_scale=True, unit_divisor=1024)
+    async with aiofiles.open(file_name, 'rb') as f:
+        for _ in range(chunks):
+            chunk = await f.read(chunk_size)
+            progress.update(len(chunk))
+            yield chunk
+            
 async def async_upload_from_file(src, dst):
     async with aiohttp.ClientSession() as session:
         await session.post(dst, data=file_sender(file_name=src))
@@ -54,13 +64,3 @@ async def download_file(src_url, dest_file, chunk_size=65536):
                 async for chunk in resp.content.iter_chunked(chunk_size):
                     await fd.write(chunk)
                     progress.update(len(chunk))
-
-async def file_sender(file_name=None, chunk_size=65536):
-    file_size = os.path.getsize(file_name)
-    chunks = max(1, int(math.ceil(file_size / chunk_size)))
-    progress = tqdm(desc=f"Uploading", total=file_size, unit="B", unit_scale=True, unit_divisor=1024)
-    async with aiofiles.open(file_name, 'rb') as f:
-        for _ in range(chunks):
-            chunk = await f.read(chunk_size)
-            progress.update(len(chunk))
-            yield chunk
