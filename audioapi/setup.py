@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='audioapi',
@@ -13,6 +13,9 @@ setup(
     install_requires=[
                         'requests',
                         'wget',
+                        'aiohttp',
+                        'aiofiles',
+                        'tqdm',
                         'halo'
     ],
  )
