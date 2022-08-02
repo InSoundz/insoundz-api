@@ -31,10 +31,23 @@ class AudioAPI(object):
     def get_default_endpoint_url():
         return DEFAULT_ENDPOINT_URL
 
+    def enhance_upload(self):
+        """
+        Request the Audio API for a URL to upload the original audio file.
+        The function returns a JSON object with a upload_url key and a 
+        session_id key (to be later used by the enhance_status function).
+
+        :return:                A JSON with a <session_id> and <upload_url>
+        :rtype:                 A JSON object
+        """
+        url = urlunsplit(("https", self._endpoint_url, "enhance", "", ""))
+
+        return requests.put(url, headers=self._headers, json={})
+
     def enhance_file(self, file_url, retention=None):
         """
         Send a URL of the original audio file to the Audio API for audio
-        enhancement. The function returns a JSON object with a sessionId key
+        enhancement. The function returns a JSON object with a session_id key
         to be later used by the enhance_status function.
 
         :param str file_url:    The URL of the original audio file for
@@ -43,7 +56,7 @@ class AudioAPI(object):
                                 of the enhanced audio file.
                                 for <retention> minutes.
                                 (This param is optional)
-        :return:                A JSON with a <sessionId>
+        :return:                A JSON with a <session_id>
         :rtype:                 A JSON object
         """
         url = urlunsplit(("https", self._endpoint_url, "enhance", "", ""))
