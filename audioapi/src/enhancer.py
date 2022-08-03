@@ -8,6 +8,7 @@ from halo import Halo
 from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
+DEFAULT_ENHANCE_VERSION = "v1"
 
 
 class AudioEnhancer(object):
@@ -16,14 +17,21 @@ class AudioEnhancer(object):
     """
     def __init__(
         self,
-        api_token, endpoint_url=AudioAPI.get_default_endpoint_url(),
+        api_token,
+        endpoint_url=AudioAPI.get_default_endpoint_url(),
+        version=DEFAULT_ENHANCE_VERSION,
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
         self._api_token = api_token
         self._endpoint_url = endpoint_url
+        self._version = version
         self._status_interval_sec = status_interval_sec
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
+
+    @staticmethod
+    def get_default_version():
+        return DEFAULT_ENHANCE_VERSION
 
     def _initialize_logger(self, logger_name):
         logger = logging.getLogger(logger_name)
@@ -169,7 +177,7 @@ class AudioEnhancer(object):
 
         kwargs = dict(
             api_token=self._api_token,
-            endpoint_url=self._endpoint_url,
+            endpoint_url=os.path.join(self._endpoint_url, self._version),
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
