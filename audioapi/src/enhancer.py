@@ -1,6 +1,5 @@
 import logging
 import sys
-import os
 import time
 import wget
 from pathlib import Path, PurePath
@@ -9,7 +8,6 @@ from audioapi.helpers import *
 from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
-DEFAULT_ENHANCE_VERSION = "v1"
 
 
 class AudioEnhancer(object):
@@ -19,9 +17,7 @@ class AudioEnhancer(object):
     def __init__(
         self,
         api_token,
-        endpoint_url=os.path.join(
-            AudioAPI.get_default_endpoint_url(), DEFAULT_ENHANCE_VERSION
-        ),
+        endpoint_url=AudioAPI.get_default_endpoint_url(),
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
@@ -29,10 +25,6 @@ class AudioEnhancer(object):
         self._endpoint_url = endpoint_url
         self._status_interval_sec = status_interval_sec
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
-
-    @staticmethod
-    def get_default_version():
-        return DEFAULT_ENHANCE_VERSION
 
     def _initialize_logger(self, logger_name):
         logger = logging.getLogger(logger_name)
@@ -100,7 +92,7 @@ class AudioEnhancer(object):
         self._logger.info(f"Enhanced file URL is located at "
                           f"{enhanced_file_url}")
         if is_url(dst):
-            self._logger.warning(f"Destination path {dst} invalid.")
+            self._logger.warning(f"Invalid destination path {dst}.")
             dst = None
 
         # Downloading enhanced file
@@ -122,18 +114,14 @@ class AudioEnhancer(object):
     def _enhancement_start(self, api, src, retention):
         self._logger.info(f"Sending a request to AudioAPI to enhance {src}.")
 
-        # Source file is on remote
         if is_url(src):  
-            response = api.enhance_file(src, retention)
-            session_id = self._get_key_from_response("session_id", response)
+            raise Exception(f"Invalid source path {src}.")
 
-        # Source file is on the local machine
-        else:
-            response = api.enhance_upload()
-            session_id = self._get_key_from_response("session_id", response)
-            src_url = self._get_key_from_response("upload_url", response)
-            self._logger.info(f"Uploading {src} to AudioAPI for processing.")
-            upload_from_file(src, src_url)
+        response = api.enhance_file(retention)
+        session_id = self._get_key_from_response("session_id", response)
+        src_url = self._get_key_from_response("upload_url", response)
+        self._logger.info(f"Uploading {src} to AudioAPI for processing.")
+        upload_file(src, src_url)
 
         return session_id
 

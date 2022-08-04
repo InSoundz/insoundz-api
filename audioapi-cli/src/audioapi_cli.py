@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import click
-import os
 from audioapi.api import AudioAPI
 from audioapi.enhancer import AudioEnhancer
 
@@ -23,15 +22,12 @@ def audioapi_cli():
     "--endpoint-url",
     type=str,
     help="Use an alternative endpoint URL (without the 'http://' prefix)",
-    default=os.path.join(
-        AudioAPI.get_default_endpoint_url(), 
-        AudioEnhancer.get_default_version()
-    ),
+    default=AudioAPI.get_default_endpoint_url(),
 )
 @click.option(
     "--src",
     type=str,
-    help="A URL or a local path of the original audio file",
+    help="A local path of the original audio file",
     prompt="src",
     required=True,
 )
@@ -44,14 +40,13 @@ def audioapi_cli():
 @click.option(
     "--dst",
     type=str,
-    help=f"A URL to upload the enhanced file or a local path to download the "
-          "enhanced file [default: "
+    help=f"A local path to download the enhanced file [default: "
           "<current_path>/<original_filename>_enhanced.<original_suffix>]",
 )
-@click.option("--retention", type=str, help="URL Retention duration [minutes]")
+@click.option("--retention", type=int, help="URL Retention duration [minutes]")
 @click.option(
     "--status-interval",
-    type=int,
+    type=float,
     help="Check the enhancement process every <status-interval> [seconds]",
     default=AudioEnhancer.get_default_status_interval(),
 )

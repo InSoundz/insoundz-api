@@ -13,8 +13,6 @@ setup(
     install_requires=[
                         'requests',
                         'wget',
-                        'aiohttp',
-                        'aiofiles',
                         'tqdm',
                         'halo'
     ],
