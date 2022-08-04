@@ -53,7 +53,9 @@ class AudioAPI(object):
         if retention:
             data["retention"] = retention
 
-        return requests.put(url, headers=self._headers, json=data)
+        response = requests.put(url, headers=self._headers, json=data)
+        response.raise_for_status()
+        return response
 
     def enhance_status(self, session_id, version=DEFAULT_ENHANCE_VERSION):
         """
@@ -74,4 +76,6 @@ class AudioAPI(object):
         url = urlunsplit(('https', self._endpoint_url,
                          f'{version}/enhance/{session_id}', '', ''))
 
-        return requests.get(url, headers=self._headers)
+        response = requests.get(url, headers=self._headers)
+        response.raise_for_status()
+        return response

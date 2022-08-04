@@ -25,6 +25,7 @@ class AudioEnhancer(object):
         self._endpoint_url = endpoint_url
         self._status_interval_sec = status_interval_sec
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
+        self._status = None
 
     def _initialize_logger(self, logger_name):
         logger = logging.getLogger(logger_name)
@@ -37,16 +38,16 @@ class AudioEnhancer(object):
         logger.addHandler(stdout_handler)
         return logger
 
-    def _update_job_done(self, prev_status, status):
+    def _update_job_done(self, prev_status):
         if prev_status:
-            if status == "failure":
+            if self._status == "failure":
                 self._spinner.fail()
             else:
                 self._spinner.succeed()
 
-    def _progress_text(self, session_id, status, start_time):
+    def _progress_text(self, session_id, start_time):
         sec_counter = int(time.time() - start_time)
-        return f"Session ID [{session_id}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
+        return f"Session ID [{session_id}]; Job status [{self._status}]; Elapsed time [{sec_counter} sec]  "
 
     @staticmethod
     def get_default_status_interval():
@@ -88,7 +89,6 @@ class AudioEnhancer(object):
     def _handle_enhance_file_done(
         self, src, no_download, dst, enhanced_file_url
     ):
-        self._spinner.stop()
         self._logger.info(f"Enhanced file URL is located at "
                           f"{enhanced_file_url}")
         if is_url(dst):
@@ -99,16 +99,18 @@ class AudioEnhancer(object):
         if not no_download:
             self._download_enhanced_file(enhanced_file_url, src, dst)
 
-    def _handle_enhance_file_failure(self, msg, response):
+    def _handle_enhance_file_failure(self, msg):
+        if self._status == "downloading" or self._status == "processing":
+            self._spinner.fail()
+        else:
+            self._spinner.stop()
+
         self._logger.error(f"Failure reason: {msg}")
-        response.raise_for_status()
 
     def _get_key_from_response(self, key, response):
         if key in response.json().keys():
             return response.json()[key]
         else:
-            self._spinner.fail()
-            self._handle_enhance_file_failure(response.json()["message"], response)
             raise Exception(f"Invalid key: {key}")
 
     def _enhancement_start(self, api, src, retention):
@@ -129,26 +131,26 @@ class AudioEnhancer(object):
         prev_status = None
         while not time.sleep(self._status_interval_sec):
             response = api.enhance_status(session_id)
-            status = self._get_key_from_response("status", response)
+            self._status = self._get_key_from_response("status", response)
             
-            if status != prev_status:
-                self._update_job_done(prev_status, status)
+            if self._status != prev_status:
+                self._update_job_done(prev_status)
                 start_time = time.time()              
 
-            if status == "done":
+            if self._status == "done":
                 url = self._get_key_from_response("url", response)
                 self._handle_enhance_file_done(src, no_download, dst, url)
                 break
-            elif status == "failure":
+            elif self._status == "failure":
                 msg = self._get_key_from_response("msg", response)
-                self._handle_enhance_file_failure(msg, response)
+                self._handle_enhance_file_failure(msg)
                 break
 
             self._spinner.start(
-                text=self._progress_text(session_id, status, start_time)
+                text=self._progress_text(session_id, start_time)
             )    
 
-            prev_status = status
+            prev_status = self._status
 
     def enhance_file(self, src, no_download=False, dst=None, retention=None):
         """
@@ -202,5 +204,4 @@ class AudioEnhancer(object):
             self._enhancement_wait_till_done(api, session_id, src, no_download, dst)
 
         except Exception as e:
-            self._logger.error(e)
-            self._spinner.stop()
+            self._handle_enhance_file_failure(e)
