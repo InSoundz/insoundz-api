@@ -35,7 +35,7 @@ class AudioAPI(object):
     def enhance_file(self, retention=None, version=DEFAULT_ENHANCE_VERSION):
         """
         Request the Audio API for a URL to upload the original audio file.
-        The function returns a JSON object with a upload_url key and a 
+        The function returns a Response object with a upload_url key and a
         session_id key (to be later used by the enhance_status function).
 
         :param str retention:   The client can request to maintain the URL

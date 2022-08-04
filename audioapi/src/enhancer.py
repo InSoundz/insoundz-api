@@ -92,7 +92,7 @@ class AudioEnhancer(object):
         self._logger.info(f"Enhanced file URL is located at "
                           f"{enhanced_file_url}")
         if is_url(dst):
-            self._logger.warning(f"Invalid destination path {dst}.")
+            self._logger.warning(f"Invalid destination path {dst}")
             dst = None
 
         # Downloading enhanced file
@@ -109,13 +109,13 @@ class AudioEnhancer(object):
         else:
             self._spinner.fail()
             self._handle_enhance_file_failure(response.json()["message"], response)
-            raise f"Invalid key: {key}"   
+            raise Exception(f"Invalid key: {key}")
 
     def _enhancement_start(self, api, src, retention):
-        self._logger.info(f"Sending a request to AudioAPI to enhance {src}.")
+        self._logger.info(f"Sending a request to AudioAPI to enhance {src}")
 
         if is_url(src):  
-            raise Exception(f"Invalid source path {src}.")
+            raise Exception(f"Invalid source path {src}")
 
         response = api.enhance_file(retention)
         session_id = self._get_key_from_response("session_id", response)
