@@ -20,14 +20,14 @@ class AudioEnhancer(object):
     def __init__(
         self,
         api_token,
-        endpoint_url=AudioAPI.get_default_endpoint_url(),
-        version=DEFAULT_ENHANCE_VERSION,
+        endpoint_url=os.path.join(
+            AudioAPI.get_default_endpoint_url(), DEFAULT_ENHANCE_VERSION
+        ),
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
         self._api_token = api_token
         self._endpoint_url = endpoint_url
-        self._version = version
         self._status_interval_sec = status_interval_sec
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
 
@@ -94,22 +94,15 @@ class AudioEnhancer(object):
         download_file(enhanced_file_url, str(dst_path))
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 
-    def _upload_enhanced_file(self, enhanced_file_url, dst):
-        self._logger.info(f"Uploading enhanced file to {dst}")
-        asyncio.run(async_upload_from_url(enhanced_file_url, dst))
-        self._logger.info(f"Enhanced file was uploaded succesfully.")
-
     def _handle_enhance_file_done(
         self, src, no_download, dst, enhanced_file_url
     ):
         self._spinner.stop()
         self._logger.info(f"Enhanced file URL is located at "
                           f"{enhanced_file_url}")
-
-        # Uploading enhanced file
         if is_url(dst):
-            self._upload_enhanced_file(enhanced_file_url, dst)
-            return
+            self._logger.warning(f"Destination path {dst} invalid.")
+            dst = None
 
         # Downloading enhanced file
         if not no_download:
@@ -211,7 +204,7 @@ class AudioEnhancer(object):
 
         kwargs = dict(
             api_token=self._api_token,
-            endpoint_url=os.path.join(self._endpoint_url, self._version),
+            endpoint_url=self._endpoint_url,
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}

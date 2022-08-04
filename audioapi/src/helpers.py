@@ -81,28 +81,3 @@ async def async_download_file(src_url, dest_file, chunk_size=DEFAULT_CHUNK_SIZE)
                 async for chunk in response.content.iter_chunked(chunk_size):
                     await fd.write(chunk)
                     progress.update(len(chunk))
-
-async def async_url_sender(url=None, chunk_size=DEFAULT_CHUNK_SIZE):
-    async with aiohttp.ClientSession() as session:
-        response = await session.get(url)
-        response.raise_for_status()
-
-        file_size = None
-        if 'Content-Length' in response.headers.keys() and \
-            int(response.headers['Content-Length']) != 0:
-            file_size = int(response.headers['Content-Length'])
-
-        kwargs = dict(
-            desc="Uploading", total=file_size, unit="B",
-            unit_scale=True, unit_divisor=1024,
-        )
-        kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
-
-        progress = tqdm(**kwargsNotNone)
-        async for chunk in response.content.iter_chunked(chunk_size):
-            progress.update(len(chunk))
-            yield chunk
-
-async def async_upload_from_url(src, dst):
-    async with aiohttp.ClientSession() as session:
-        await session.post(dst, data=async_url_sender(src))
