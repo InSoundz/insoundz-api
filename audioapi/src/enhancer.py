@@ -221,12 +221,6 @@ class AudioEnhancer(object):
             session_id = self._enhancement_start(api, src, retention)
             self._enhancement_wait_till_done(api, session_id, src, no_download, dst)
 
-                self._spinner.start(
-                    text=self._progress_text(session_id, status, start_time)
-                )    
-
-                prev_status = status
-
         except Exception as e:
             self._logger.error(e)
             self._spinner.stop()
