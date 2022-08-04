@@ -19,13 +19,11 @@ class AudioEnhancer(object):
         self,
         api_token,
         endpoint_url=AudioAPI.get_default_endpoint_url(),
-        version=DEFAULT_ENHANCE_VERSION,
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
         self._api_token = api_token
         self._endpoint_url = endpoint_url
-        self._version = version
         self._status_interval_sec = status_interval_sec
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
 
@@ -177,7 +175,7 @@ class AudioEnhancer(object):
 
         kwargs = dict(
             api_token=self._api_token,
-            endpoint_url=os.path.join(self._endpoint_url, self._version),
+            endpoint_url=self._endpoint_url,
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
