@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='audioapi-cli',
@@ -15,7 +15,7 @@ setup(
     package_dir={"audioapi_cli": "src"},
     packages=['audioapi_cli'],
     install_requires=[
-                        'click',
+                        'click>=8.1.3',
                         'audioapi'
     ],
  )

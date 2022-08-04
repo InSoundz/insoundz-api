@@ -3,6 +3,7 @@ from urllib.parse import urlunsplit
 import logging
 
 DEFAULT_ENDPOINT_URL = "api.insoundz.io"
+DEFAULT_ENHANCE_VERSION = "v1"
 
 
 class AudioAPI(object):
@@ -31,7 +32,7 @@ class AudioAPI(object):
     def get_default_endpoint_url():
         return DEFAULT_ENDPOINT_URL
 
-    def enhance_file(self, file_url, retention=None):
+    def enhance_file(self, file_url, retention=None, version=DEFAULT_ENHANCE_VERSION):
         """
         Send a URL of the original audio file to the Audio API for audio
         enhancement. The function returns a JSON object with a sessionId key
@@ -46,14 +47,14 @@ class AudioAPI(object):
         :return:                A JSON with a <sessionId>
         :rtype:                 A JSON object
         """
-        url = urlunsplit(("https", self._endpoint_url, "enhance", "", ""))
+        url = urlunsplit(("https", self._endpoint_url, f"{version}/enhance", "", ""))
         data = {"file_url": file_url}
         if retention:
             data["retention"] = retention
 
         return requests.post(url, headers=self._headers, json=data)
 
-    def enhance_status(self, session_id):
+    def enhance_status(self, session_id, version=DEFAULT_ENHANCE_VERSION):
         """
         Checks the status of the audio file that is under audio enhancement
         process (by sending a <session_id> which was given by enhance_file()).
@@ -69,6 +70,6 @@ class AudioAPI(object):
         :rtype:                 A JSON object
         """
         url = urlunsplit(('https', self._endpoint_url,
-                         f'enhance/{session_id}', '', ''))
+                         f'{version}/enhance/{session_id}', '', ''))
 
         return requests.get(url, headers=self._headers)
