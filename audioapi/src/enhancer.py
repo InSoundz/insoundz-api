@@ -3,7 +3,6 @@ import sys
 import os
 import time
 import wget
-import asyncio
 from pathlib import Path, PurePath
 from halo import Halo
 from audioapi.helpers import *
