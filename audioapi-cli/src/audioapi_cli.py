@@ -12,7 +12,7 @@ def audioapi_cli():
 
 @click.command("enhance-file", context_settings={"show_default": True})
 @click.option(
-    "--api-token",
+    "--api-token", "--api-key",
     type=str,
     help="Authentication key to access InSoundz AudioAPI services",
     prompt="API token",
