@@ -2,6 +2,7 @@ import logging
 import sys
 import time
 import wget
+import os
 from urllib.parse import urlparse
 from pathlib import Path, PurePath
 from halo import Halo
@@ -18,7 +19,9 @@ class AudioEnhancer(object):
     def __init__(
         self,
         api_token,
-        endpoint_url=AudioAPI.get_default_endpoint_url(),
+        endpoint_url=os.path.join(
+            AudioAPI.get_default_endpoint_url(), DEFAULT_ENHANCE_VERSION
+        )
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
