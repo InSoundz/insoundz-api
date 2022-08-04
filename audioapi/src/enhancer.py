@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 import time
 import wget
 import asyncio
@@ -9,6 +10,7 @@ from audioapi.helpers import *
 from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
+DEFAULT_ENHANCE_VERSION = "v1"
 
 
 class AudioEnhancer(object):
@@ -17,14 +19,21 @@ class AudioEnhancer(object):
     """
     def __init__(
         self,
-        api_token, endpoint_url=AudioAPI.get_default_endpoint_url(),
+        api_token,
+        endpoint_url=AudioAPI.get_default_endpoint_url(),
+        version=DEFAULT_ENHANCE_VERSION,
         status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
         self._api_token = api_token
         self._endpoint_url = endpoint_url
+        self._version = version
         self._status_interval_sec = status_interval_sec
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
+
+    @staticmethod
+    def get_default_version():
+        return DEFAULT_ENHANCE_VERSION
 
     def _initialize_logger(self, logger_name):
         logger = logging.getLogger(logger_name)
@@ -82,12 +91,12 @@ class AudioEnhancer(object):
         dst_path = PurePath.joinpath(dir, filename)
 
         self._logger.info(f"Downloading enhanced file to {dst_path}")
-        asyncio.run(download_file(enhanced_file_url, str(dst_path)))
+        download_file(enhanced_file_url, str(dst_path))
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 
     def _upload_enhanced_file(self, enhanced_file_url, dst):
         self._logger.info(f"Uploading enhanced file to {dst}")
-        asyncio.run(upload_from_url(enhanced_file_url, dst))
+        asyncio.run(async_upload_from_url(enhanced_file_url, dst))
         self._logger.info(f"Enhanced file was uploaded succesfully.")
 
     def _handle_enhance_file_done(
@@ -202,7 +211,7 @@ class AudioEnhancer(object):
 
         kwargs = dict(
             api_token=self._api_token,
-            endpoint_url=self._endpoint_url,
+            endpoint_url=os.path.join(self._endpoint_url, self._version),
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}

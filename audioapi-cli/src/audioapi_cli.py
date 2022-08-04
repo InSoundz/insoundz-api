@@ -12,7 +12,7 @@ def audioapi_cli():
 
 @click.command("enhance-file", context_settings={"show_default": True})
 @click.option(
-    "--api-token",
+    "--api-token", "--api-key",
     type=str,
     help="Authentication key to access InSoundz AudioAPI services",
     prompt="API token",
@@ -23,6 +23,12 @@ def audioapi_cli():
     type=str,
     help="Use an alternative endpoint URL (without the 'http://' prefix)",
     default=AudioAPI.get_default_endpoint_url(),
+)
+@click.option(
+    "--version",
+    type=str,
+    help="Method version",
+    default=AudioEnhancer.get_default_version(),
 )
 @click.option(
     "--src",
@@ -52,10 +58,10 @@ def audioapi_cli():
     default=AudioEnhancer.get_default_status_interval(),
 )
 def enhance_file(
-    api_token=None, endpoint_url=None, src=None,
+    api_token=None, endpoint_url=None, version=None, src=None,
     no_download=None, dst=None, retention=None, status_interval=None,
 ):
-    enhancer = AudioEnhancer(api_token, endpoint_url, status_interval)
+    enhancer = AudioEnhancer(api_token, endpoint_url, version, status_interval)
     enhancer.enhance_file(src, no_download, dst, retention)
 
 audioapi_cli.add_command(enhance_file)
