@@ -18,7 +18,8 @@ class AudioEnhancer(object):
         self,
         api_token,
         endpoint_url=AudioAPI.get_default_endpoint_url(),
-        status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
+        status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
+        progress_bar=False
     ):
         self._logger = self._initialize_logger("AudioEnhancer")
         self._api_token = api_token
@@ -26,6 +27,7 @@ class AudioEnhancer(object):
         self._status_interval_sec = status_interval_sec
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
         self._status = None
+        self._progress_bar = progress_bar
 
     def _initialize_logger(self, logger_name):
         logger = logging.getLogger(logger_name)
@@ -83,7 +85,7 @@ class AudioEnhancer(object):
         dst_path = PurePath.joinpath(dir, filename)
 
         self._logger.info(f"Downloading enhanced file to {dst_path}")
-        download_file(enhanced_file_url, str(dst_path))
+        download_file(enhanced_file_url, str(dst_path), self._progress_bar)
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 
     def _handle_enhance_file_done(
@@ -123,7 +125,7 @@ class AudioEnhancer(object):
         session_id = self._get_key_from_response("session_id", response)
         src_url = self._get_key_from_response("upload_url", response)
         self._logger.info(f"Uploading {src} to AudioAPI for processing.")
-        upload_file(src, src_url)
+        upload_file(src, src_url, self._progress_bar)
 
         return session_id
 

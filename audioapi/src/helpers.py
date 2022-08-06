@@ -20,7 +20,7 @@ def is_file(path):
     else:
         return False
 
-def upload_file(src, dst):
+def upload_file_with_pbar(src, dst):
     file_size = os.path.getsize(src)
     with open(src, "rb") as fd:
         with tqdm(desc=f"Uploading", total=file_size, unit="B", unit_scale=True, unit_divisor=1024) as t:
@@ -28,7 +28,18 @@ def upload_file(src, dst):
             response = requests.put(dst, data=reader_wrapper)
             response.raise_for_status()
 
-def download_file(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
+def upload_file_no_pbar(src, dst):
+    with open(src, "rb") as fd:
+        response = requests.put(dst, data=fd)
+        response.raise_for_status()
+
+def upload_file(src, dst, pbar=False):
+    if pbar:
+        upload_file_with_pbar(src, dst)
+    else:
+        upload_file_no_pbar(src, dst)
+
+def download_file_with_pbar(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
     response = requests.get(src, stream=True)
     response.raise_for_status()
 
@@ -42,3 +53,16 @@ def download_file(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
     with tqdm.wrapattr(open(dst, "wb"), "write", **kwargsNotNone) as fd:
         for chunk in response.iter_content(chunk_size):
             fd.write(chunk)
+
+def download_file_no_pbar(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
+    with requests.get(src, stream=True) as response:
+        response.raise_for_status()
+        with open(dst, 'wb') as fd:
+            for chunk in response.iter_content(chunk_size):
+                fd.write(chunk)
+
+def download_file(src, dst, chunk_size=DEFAULT_CHUNK_SIZE, pbar=False):
+    if pbar:
+        download_file_with_pbar(src, dst, chunk_size)
+    else:
+        download_file_no_pbar(src, dst, chunk_size)
