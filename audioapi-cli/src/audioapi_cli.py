@@ -59,8 +59,8 @@ def enhance_file(
     api_token=None, endpoint_url=None, src=None, no_download=False,
     dst=None, retention=None, status_interval=None, no_progress_bar=False
 ):
-    enhancer = AudioEnhancer(api_token, endpoint_url, status_interval, not no_progress_bar)
-    enhancer.enhance_file(src, no_download, dst, retention)
+    enhancer = AudioEnhancer(api_token, endpoint_url, not no_progress_bar)
+    enhancer.enhance_file(src, no_download, dst, retention, status_interval)
 
 audioapi_cli.add_command(enhance_file)
 

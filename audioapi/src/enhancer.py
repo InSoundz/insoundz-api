@@ -9,39 +9,50 @@ from audioapi.api import AudioAPI
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
 
 
-class Session(object):
-    def __init__(self, api, session_id, src, no_download, dst, progress_bar):
-        self._api = api
-        self._id = session_id
-        self._src = src
-        self._dst = dst
-        self._no_download = no_download
+class AudioEnhancer(object):
+    """
+    A wrapper for the audioapi client to produce audio enhancement.
+    """
+    def __init__(
+        self,
+        api_token,
+        endpoint_url=AudioAPI.get_default_endpoint_url(),
+        progress_bar=False
+    ):
+        self._logger = initialize_logger("AudioEnhancer")
+        self._progress_bar = progress_bar
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
-        self._status = None
-        self._logger = initialize_logger(f"AudioEnhancer [{session_id}]")
         self._progress_bar = progress_bar
 
-    def _progress_text(self, start_time):
+        kwargs = dict(
+            api_token=api_token,
+            endpoint_url=endpoint_url,
+            logger=self._logger,
+        )
+        kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
+        self._api = AudioAPI(**kwargsNotNone)
+
+    def _progress_text(self, start_time, session_id, status):
         sec_counter = int(time.time() - start_time)
-        return f"Session ID [{self._id}]; Job status [{self._status}]; Elapsed time [{sec_counter} sec]  "
+        return f"Session ID [{session_id}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
 
-    def _start_spinner(self, start_time):
+    def _start_spinner(self, start_time, session_id, status):
         if self._progress_bar:
-            self._spinner.start(text=self._progress_text(start_time))
+            self._spinner.start(text=self._progress_text(start_time, session_id, status))
 
-    def _update_job_done(self, prev_status):
+    def _update_job_done(self, prev_status, status):
         if self._progress_bar:
             if prev_status:
-                if self._status == "failure":
+                if status == "failure":
                     self._spinner.fail()
                 else:
                     self._spinner.succeed()
         else:
-            self._logger.info(f"Job status [{self._status}]")
+            self._logger.info(f"Job status [{status}]")
 
-    def _handle_enhance_failure(self, msg):
+    def _handle_enhance_failure(self, msg, status):
         if self._progress_bar:
-            if self._status == "downloading" or self._status == "processing":
+            if status == "downloading" or status == "processing":
                 self._spinner.fail()
             else:
                 self._spinner.stop()
@@ -81,83 +92,50 @@ class Session(object):
         download_file(enhanced_file_url, str(dst_path), self._progress_bar)
         self._logger.info(f"{dst_path} was downloaded succesfully.")
 
-    def _handle_enhance_done(self, enhanced_file_url):
+    def _handle_enhance_done(self, enhanced_file_url, src, no_download, dst):
         self._logger.info(f"Enhanced file URL is located at "
                           f"{enhanced_file_url}")
-        if self._dst and validators.url(self._dst):
-            self._logger.warning(f"Invalid destination path {self._dst}")
-            self._dst = None
+        if dst and validators.url(dst):
+            self._logger.warning(f"Invalid destination path {dst}")
+            dst = None
 
         # Downloading enhanced file
-        if not self._no_download:
-            self._download_enhanced_file(enhanced_file_url, self._src, self._dst)
+        if not no_download:
+            self._download_enhanced_file(enhanced_file_url, src, dst)
 
-    def get_id(self):
-        return self._id
-
-    def wait_till_done(self, status_interval_sec):
+    def _wait_till_done(self, session_id, status_interval_sec):
         try:
             prev_status = None
+            status = None
             while not time.sleep(status_interval_sec):
-                response = self._api.enhance_status(self.get_id())
-                self._status = get_key_from_dict("status", response)
+                response = self._api.enhance_status(session_id)
+                status = get_key_from_dict("status", response)
 
-                if self._status != prev_status:
-                    self._update_job_done(prev_status)
+                if status != prev_status:
+                    self._update_job_done(prev_status, status)
                     start_time = time.time()
 
-                if self._status == "done" or self._status == "failure":
-                    return self._status, response
+                if status == "done" or status == "failure":
+                    return status, response
 
-                self._start_spinner(start_time)
-                prev_status = self._status
+                self._start_spinner(start_time, session_id, status)
+                prev_status = status
 
         except Exception as e:
-            self._handle_enhance_failure(e)
+            self._handle_enhance_failure(e, status)
             raise Exception(e)
 
-    def handle_job_done(self, response):
-        if self._status == "done":
+    def _handle_job_done(self, status, response, src, no_download, dst):
+        if status == "done":
             url = get_key_from_dict("url", response)
-            self._handle_enhance_done(url)
-        elif self._status == "failure":
+            self._handle_enhance_done(url, src, no_download, dst)
+        elif status == "failure":
             msg = get_key_from_dict("msg", response)
-            self._handle_enhance_failure(msg)
+            self._handle_enhance_failure(msg, status)
         else:
-            self._logger.exception(f"Unexpected status {self._status}")
+            self._logger.exception(f"Unexpected status {status}")
 
-
-class AudioEnhancer(object):
-    """
-    A wrapper for the audioapi client to produce audio enhancement.
-    """
-    def __init__(
-        self,
-        api_token,
-        endpoint_url=AudioAPI.get_default_endpoint_url(),
-        status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
-        progress_bar=False
-    ):
-        self._logger = initialize_logger("AudioEnhancer")
-        self._status_interval_sec = status_interval_sec
-        self._progress_bar = progress_bar
-        self._sessions_list = {}
-
-        kwargs = dict(
-            api_token=api_token,
-            endpoint_url=endpoint_url,
-            logger=self._logger,
-        )
-        kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
-        self._api = AudioAPI(**kwargsNotNone)
-
-    def _create_session(self, api, session_id, src, no_download, dst):
-        self._sessions_list[session_id] = Session(
-                api, session_id, src, no_download, dst, self._progress_bar
-            )
-        return self._sessions_list[session_id]
-
-    def _enhancement_start(self, api, src, no_download, dst, retention):
+    def _enhancement_start(self, api, src, retention):
         self._logger.info(f"Sending a request to AudioAPI to enhance {src}")
 
         if validators.url(src):
@@ -169,10 +147,12 @@ class AudioEnhancer(object):
         self._logger.info(f"Uploading {src} to AudioAPI for processing.")
         upload_file(src, src_url, self._progress_bar)
 
-        session = self._create_session(api, session_id, src, no_download, dst)
-        return session
+        return session_id
 
-    def enhance_file(self, src, no_download=False, dst=None, retention=None):
+    def enhance_file(
+            self, src, no_download=False, dst=None, retention=None,
+            status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
+        ):
         """
         It uses the audioapi package to enhance the file that is located
         in <src>.
@@ -207,23 +187,21 @@ class AudioEnhancer(object):
                                     therefore it's not recommanded to set the
                                     <no_download> flag.
                                     (This param is optional)
+        :param int  status_interval_sec:    
+                                    The client can set the frequency of querying
+                                    the status of the audio enhancement process.
+                                    (This param is optional)                                    
         :return:                    None
         :rtype:                     None
         """
 
-        session = None
-
-        try: 
-            session = self._enhancement_start(self._api, src, no_download, dst, retention)
-            _, resp = session.wait_till_done(self._status_interval_sec)
-            session.handle_job_done(resp)
+        try:
+            session_id = self._enhancement_start(self._api, src, retention)
+            status, resp = self._wait_till_done(session_id, status_interval_sec)
+            self._handle_job_done(status, resp, src, no_download, dst)
 
         except Exception as e:
             self._logger.error(e)
-
-        finally:
-            if session and session.get_id() in self._sessions_list:
-                del self._sessions_list[session.get_id()]
 
     @staticmethod
     def get_default_status_interval():
