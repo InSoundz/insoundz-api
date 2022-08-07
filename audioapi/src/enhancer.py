@@ -26,20 +26,25 @@ class Session(object):
         return f"Session ID [{self._id}]; Job status [{self._status}]; Elapsed time [{sec_counter} sec]  "
 
     def _start_spinner(self, start_time):
-        self._spinner.start(text=self._progress_text(start_time))
+        if self._progress_bar:
+            self._spinner.start(text=self._progress_text(start_time))
 
     def _update_job_done(self, prev_status):
-        if prev_status:
-            if self._status == "failure":
-                self._spinner.fail()
-            else:
-                self._spinner.succeed()
+        if self._progress_bar:
+            if prev_status:
+                if self._status == "failure":
+                    self._spinner.fail()
+                else:
+                    self._spinner.succeed()
+        else:
+            self._logger.info(f"Job status [{self._status}]")
 
     def _handle_enhance_failure(self, msg):
-        if self._status == "downloading" or self._status == "processing":
-            self._spinner.fail()
-        else:
-            self._spinner.stop()
+        if self._progress_bar:
+            if self._status == "downloading" or self._status == "processing":
+                self._spinner.fail()
+            else:
+                self._spinner.stop()
 
         self._logger.error(f"Failure reason: {msg}")
 
@@ -70,7 +75,7 @@ class Session(object):
             filename = self._get_default_dst_filename(src)
 
         Path(folder).mkdir(parents=True, exist_ok=True)
-        dst_path = PurePath.joinpath(folder, filename)
+        dst_path = os.path.join(folder, filename)
 
         self._logger.info(f"Downloading enhanced file to {dst_path}")
         download_file(enhanced_file_url, str(dst_path), self._progress_bar)
@@ -90,43 +95,36 @@ class Session(object):
     def get_id(self):
         return self._id
 
-    def get_status(self):
-        return self._status
-
-    def set_status(self, status):
-        self._status = status
-
     def wait_till_done(self, status_interval_sec):
         try:
             prev_status = None
             while not time.sleep(status_interval_sec):
                 response = self._api.enhance_status(self.get_id())
-                status = get_key_from_dict("status", response)
-                self.set_status(status)
+                self._status = get_key_from_dict("status", response)
 
-                if self.get_status() != prev_status:
+                if self._status != prev_status:
                     self._update_job_done(prev_status)
                     start_time = time.time()
 
-                if self.get_status() == "done" or self.get_status() == "failure":
-                    return self.get_status(), response
+                if self._status == "done" or self._status == "failure":
+                    return self._status, response
 
                 self._start_spinner(start_time)
-                prev_status = self.get_status()
+                prev_status = self._status
 
         except Exception as e:
             self._handle_enhance_failure(e)
             raise Exception(e)
 
     def handle_job_done(self, response):
-        if self.get_status() == "done":
+        if self._status == "done":
             url = get_key_from_dict("url", response)
             self._handle_enhance_done(url)
-        elif self.get_status() == "failure":
+        elif self._status == "failure":
             msg = get_key_from_dict("msg", response)
             self._handle_enhance_failure(msg)
         else:
-            self._logger.exception(f"Unexpected status {self.get_status()}")
+            self._logger.exception(f"Unexpected status {self._status}")
 
 
 class AudioEnhancer(object):
