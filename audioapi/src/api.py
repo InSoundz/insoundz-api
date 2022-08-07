@@ -4,6 +4,7 @@ import logging
 
 DEFAULT_ENDPOINT_URL = "api.insoundz.io"
 DEFAULT_ENHANCE_VERSION = "v1"
+DEFAULT_TIMEOUT_SEC = 2
 
 
 class AudioAPI(object):
@@ -53,7 +54,7 @@ class AudioAPI(object):
         if retention:
             data["retention"] = retention
 
-        response = requests.put(url, headers=self._headers, json=data)
+        response = requests.put(url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC)
         response.raise_for_status()
         return response
 
@@ -76,6 +77,6 @@ class AudioAPI(object):
         url = urlunsplit(('https', self._endpoint_url,
                          f'{version}/enhance/{session_id}', '', ''))
 
-        response = requests.get(url, headers=self._headers)
+        response = requests.get(url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC)
         response.raise_for_status()
         return response

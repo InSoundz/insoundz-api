@@ -14,6 +14,7 @@ setup(
                         'requests',
                         'wget',
                         'tqdm',
-                        'halo'
+                        'halo',
+                        'validators',
     ],
  )

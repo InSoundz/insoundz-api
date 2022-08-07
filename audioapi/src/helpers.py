@@ -1,36 +1,55 @@
 import requests
 import os
-from urllib.parse import urlparse
+import sys
+import logging
+import validators
 from pathlib import PurePath
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 DEFAULT_CHUNK_SIZE = 65536
+DEFAULT_TIMEOUT_SEC = 5
 
-
-def is_url(path):
-    if path:
-        return urlparse(path).scheme != ""
-    else:
-        return False
+def initialize_logger(logger_name):
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setFormatter(formatter)
+    logger.addHandler(stdout_handler)
+    return logger
 
 def is_file(path):
-    if not is_url(path):
+    if not validators.url(path):
         return PurePath(path).suffix != ""
     else:
         return False
+
+def is_folder(path):
+    if not validators.url(path):
+        return not is_file(path)
+    else:
+        return False
+
+def get_key_from_dict(key, response):
+    if key in response.json().keys():
+        return response.json()[key]
+    else:
+        raise Exception(f"Invalid key: {key}")
 
 def upload_file_with_pbar(src, dst):
     file_size = os.path.getsize(src)
     with open(src, "rb") as fd:
         with tqdm(desc=f"Uploading", total=file_size, unit="B", unit_scale=True, unit_divisor=1024) as t:
             reader_wrapper = CallbackIOWrapper(t.update, fd, "read")
-            response = requests.put(dst, data=reader_wrapper)
+            response = requests.put(dst, data=reader_wrapper, timeout=DEFAULT_TIMEOUT_SEC)
             response.raise_for_status()
 
 def upload_file_no_pbar(src, dst):
     with open(src, "rb") as fd:
-        response = requests.put(dst, data=fd)
+        response = requests.put(dst, data=fd, timeout=DEFAULT_TIMEOUT_SEC)
         response.raise_for_status()
 
 def upload_file(src, dst, pbar=False):
@@ -40,7 +59,7 @@ def upload_file(src, dst, pbar=False):
         upload_file_no_pbar(src, dst)
 
 def download_file_with_pbar(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
-    response = requests.get(src, stream=True)
+    response = requests.get(src, stream=True, timeout=DEFAULT_TIMEOUT_SEC)
     response.raise_for_status()
 
     file_size = None
@@ -55,7 +74,7 @@ def download_file_with_pbar(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
             fd.write(chunk)
 
 def download_file_no_pbar(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
-    with requests.get(src, stream=True) as response:
+    with requests.get(src, stream=True, timeout=DEFAULT_TIMEOUT_SEC) as response:
         response.raise_for_status()
         with open(dst, 'wb') as fd:
             for chunk in response.iter_content(chunk_size):
