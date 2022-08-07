@@ -33,12 +33,11 @@ class AudioEnhancer(object):
         return f"Session ID [{sid}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
 
     def _update_job_done(self, sid, prev_status, status, pbar, spinner):
-        if pbar:
-            if prev_status:
-                if status == "failure":
-                    spinner.fail()
-                else:
-                    spinner.succeed()
+        if pbar and prev_status:
+            if status == "failure":
+                spinner.fail()
+            else:
+                spinner.succeed()
         else:
             self._logger.info(f"[{sid}] Job status [{status}]")
 
@@ -132,12 +131,8 @@ class AudioEnhancer(object):
             if not no_download:
                 self._download_enhanced_file(sid, url, src, dst, pbar)
 
-        elif status == "failure":
-            if pbar:
-                if status == "downloading" or status == "processing":
-                    spinner.fail()
-                else:
-                    spinner.stop()
+        elif status == "failure" and pbar:
+            spinner.stop()
 
             msg = get_key_from_dict("msg", resp)
             self._logger.error(f"[{sid}] Failure reason: {msg}")
