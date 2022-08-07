@@ -133,7 +133,6 @@ class AudioEnhancer(object):
 
         elif status == "failure" and pbar:
             spinner.stop()
-
             msg = get_key_from_dict("msg", resp)
             self._logger.error(f"[{sid}] Failure reason: {msg}")
 
@@ -234,13 +233,8 @@ class AudioEnhancer(object):
                 if not no_download:
                     self._download_enhanced_file(sid, url, src, dst, progress_bar)
 
-            elif status == "failure":
-                if progress_bar:
-                    if status == "downloading" or status == "processing":
-                        spinner.fail()
-                    else:
-                        spinner.stop()
-
+            elif status == "failure" and progress_bar:
+                spinner.stop()
                 msg = get_key_from_dict("msg", resp)
                 self._logger.error(f"[{sid}] Failure reason: {msg}")
 
