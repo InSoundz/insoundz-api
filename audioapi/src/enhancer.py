@@ -20,6 +20,7 @@ class AudioEnhancer(object):
         progress_bar=False
     ):
         self._logger = initialize_logger("AudioEnhancer")
+        self._session_logger = None
         self._progress_bar = progress_bar
         self._spinner = Halo(spinner='dots', color='magenta', placement='right')
         self._progress_bar = progress_bar
@@ -48,7 +49,7 @@ class AudioEnhancer(object):
                 else:
                     self._spinner.succeed()
         else:
-            self._logger.info(f"Job status [{status}]")
+            self._session_logger.info(f"Job status [{status}]")
 
     def _handle_enhance_failure(self, msg, status):
         if self._progress_bar:
@@ -57,7 +58,7 @@ class AudioEnhancer(object):
             else:
                 self._spinner.stop()
 
-        self._logger.error(f"Failure reason: {msg}")
+        self._session_logger.error(f"Failure reason: {msg}")
 
     def _get_default_dst_folder(self):
         return Path.cwd()
@@ -88,15 +89,15 @@ class AudioEnhancer(object):
         Path(folder).mkdir(parents=True, exist_ok=True)
         dst_path = os.path.join(folder, filename)
 
-        self._logger.info(f"Downloading enhanced file to {dst_path}")
+        self._session_logger.info(f"Downloading enhanced file to {dst_path}")
         download_file(enhanced_file_url, str(dst_path), self._progress_bar)
-        self._logger.info(f"{dst_path} was downloaded succesfully.")
+        self._session_logger.info(f"{dst_path} was downloaded succesfully.")
 
     def _handle_enhance_done(self, enhanced_file_url, src, no_download, dst):
-        self._logger.info(f"Enhanced file URL is located at "
+        self._session_logger.info(f"Enhanced file URL is located at "
                           f"{enhanced_file_url}")
         if dst and validators.url(dst):
-            self._logger.warning(f"Invalid destination path {dst}")
+            self._session_logger.warning(f"Invalid destination path {dst}")
             dst = None
 
         # Downloading enhanced file
@@ -133,7 +134,13 @@ class AudioEnhancer(object):
             msg = get_key_from_dict("msg", response)
             self._handle_enhance_failure(msg, status)
         else:
-            self._logger.exception(f"Unexpected status {status}")
+            self._session_logger.exception(f"Unexpected status {status}")
+
+    def _handle_general_failure(self, msg):
+        if self._session_logger:
+            self._session_logger.error(msg)
+        else:
+            self._logger.error(msg)
 
     def _enhancement_start(self, api, src, retention):
         self._logger.info(f"Sending a request to AudioAPI to enhance {src}")
@@ -144,7 +151,8 @@ class AudioEnhancer(object):
         response = api.enhance_file(retention)
         session_id = get_key_from_dict("session_id", response)
         src_url = get_key_from_dict("upload_url", response)
-        self._logger.info(f"Uploading {src} to AudioAPI for processing.")
+        self._session_logger = initialize_logger(f"AudioEnhancer [{session_id}]")
+        self._session_logger.info(f"Uploading {src} to AudioAPI for processing.")
         upload_file(src, src_url, self._progress_bar)
 
         return session_id
@@ -201,7 +209,7 @@ class AudioEnhancer(object):
             self._handle_job_done(status, resp, src, no_download, dst)
 
         except Exception as e:
-            self._logger.error(e)
+            self._handle_general_failure(e)
 
     @staticmethod
     def get_default_status_interval():
