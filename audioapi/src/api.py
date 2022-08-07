@@ -54,7 +54,7 @@ class AudioAPI(object):
         if retention:
             data["retention"] = retention
 
-        response = requests.put(url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC)
+        response = requests.post(url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC)
         response.raise_for_status()
         return response
 
