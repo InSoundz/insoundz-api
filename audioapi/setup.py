@@ -1,15 +1,16 @@
-#!/usr/bin/env python
-
 try:
-  from setuptools import setup
+    from setuptools import setup
 except ImportError:
-  from distutils.core import setup
+    from distutils.core import setup
 import importlib
 
+
 def version():
-  loader = importlib.machinery.SourceFileLoader("src.version", "src/version.py")
-  module = loader.load_module()
-  return module.__version__
+    loader = importlib.machinery.SourceFileLoader(
+        "src.version", "src/version.py"
+    )
+    module = loader.load_module()
+    return module.__version__
 
 setup(
     name='audioapi',

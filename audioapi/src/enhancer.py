@@ -30,7 +30,8 @@ class AudioEnhancer(object):
 
     def _progress_text(self, start_time, sid, status):
         sec_counter = int(time.time() - start_time)
-        return f"Session ID [{sid}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
+        return f"Session ID [{sid}]; Job status [{status}]; " \
+            f"Elapsed time [{sec_counter} sec]  "
 
     def _update_status_changed(self, sid, prev_status, status, pbar, spinner):
         if pbar and prev_status:
@@ -99,14 +100,18 @@ class AudioEnhancer(object):
                 status = response["status"]
 
                 if status != prev_status:
-                    self._update_status_changed(sid, prev_status, status, pbar, spinner)
+                    self._update_status_changed(
+                        sid, prev_status, status, pbar, spinner
+                    )
                     start_time = time.time()
 
                 if status == "done" or status == "failure":
                     return status, response
 
                 if pbar:
-                    spinner.start(text=self._progress_text(start_time, sid, status))
+                    spinner.start(
+                        text=self._progress_text(start_time, sid, status)
+                    )
                 prev_status = status
 
         except Exception as e:
@@ -144,16 +149,18 @@ class AudioEnhancer(object):
         response = api.enhance_file(retention)
         sid = response["session_id"]
         src_url = response["upload_url"]
-        self._logger.info(f"[{sid}] Uploading {src} to AudioAPI for processing.")
+        self._logger.info(
+            f"[{sid}] Uploading {src} to AudioAPI for processing."
+        )
         upload_file(src, src_url, pbar)
 
         return sid
 
     def enhance_file(
-            self, src, no_download=False, dst=None, retention=None,
-            status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
-            progress_bar=False
-        ):
+        self, src, no_download=False, dst=None, retention=None,
+        status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
+        progress_bar=False
+    ):
         """
         It uses the audioapi package to enhance the file that is located
         in <src>.
@@ -188,12 +195,13 @@ class AudioEnhancer(object):
                                     therefore it's not recommanded to set the
                                     <no_download> flag.
                                     (This param is optional)
-        :param int  status_interval_sec:    
-                                    The client can set the frequency of querying
-                                    the status of the audio enhancement process.
+        :param int  status_interval_sec:
+                                    The client can set the frequency of
+                                    querying the status of the audio
+                                    enhancement process.
                                     (This param is optional)
-        :param int  progress_bar:   The client can enable/disable the display of
-                                    the audio enhancement progress bar.
+        :param int  progress_bar:   The client can enable/disable the display
+                                    of the audio enhancement progress bar.
                                     (This param is optional)
         :return:                    None
         :rtype:                     None
@@ -205,7 +213,9 @@ class AudioEnhancer(object):
 
         try:
             sid = None
-            sid = self._enhancement_start(self._api, src, dst, retention, progress_bar)
+            sid = self._enhancement_start(
+                self._api, src, dst, retention, progress_bar
+            )
             status, resp = self._wait_till_done(
                 sid, status_interval_sec, progress_bar, spinner
             )

@@ -45,16 +45,20 @@ class AudioAPI(object):
                                 (This param is optional)
 
         :return:                A json object with a <session_id> and
-        					    <upload_url> keys.
+                                <upload_url> keys.
         :rtype:                 A json object
         """
-        url = urlunsplit(('https', self._endpoint_url, f'{version}/enhance', '', ''))
+        url = urlunsplit(
+            ('https', self._endpoint_url, f'{version}/enhance', '', '')
+        )
 
         data = {}
         if retention:
             data["retention"] = retention
 
-        response = requests.post(url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC)
+        response = requests.post(
+            url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC
+        )
         response.raise_for_status()
         return response.json()
 
@@ -76,6 +80,8 @@ class AudioAPI(object):
         url = urlunsplit(('https', self._endpoint_url,
                          f'{version}/enhance/{session_id}', '', ''))
 
-        response = requests.get(url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC)
+        response = requests.get(
+            url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC
+        )
         response.raise_for_status()
         return response.json()

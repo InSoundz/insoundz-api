@@ -11,6 +11,7 @@ from audioapi.version import __version__ as audioapi_client
 def audioapi_cli():
     pass
 
+
 @click.command(
     "enhance-file",
     help="Enhance audio file",
@@ -72,6 +73,7 @@ def enhance_file(
     enhancer.enhance_file(
         src, no_download, dst, retention, status_interval, not no_progress_bar
     )
+
 
 @click.command(
     "version",
