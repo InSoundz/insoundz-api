@@ -3,7 +3,8 @@
 import click
 from audioapi.api import AudioAPI
 from audioapi.enhancer import AudioEnhancer
-
+from audioapi_cli.version import __version__ as cli_version
+from audioapi.version import __version__ as audioapi_client
 
 @click.group()
 def audioapi_cli():
@@ -68,7 +69,13 @@ def enhance_file(
         src, no_download, dst, retention, status_interval, not no_progress_bar
     )
 
+@click.command("version", context_settings={"show_default": True})
+def version():
+    click.echo(f"AudioAPI-CLI    : v{cli_version}")
+    click.echo(f"AudioAPI-Client : v{audioapi_client}")
+
 audioapi_cli.add_command(enhance_file)
+audioapi_cli.add_command(version)
 
 if __name__ == "__main__":
     audioapi_cli()

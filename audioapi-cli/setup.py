@@ -1,8 +1,17 @@
-from setuptools import setup
+try:
+  from setuptools import setup
+except ImportError:
+  from distutils.core import setup
+import importlib
+
+def version():
+  loader = importlib.machinery.SourceFileLoader("src.version", "src/version.py")
+  module = loader.load_module()
+  return module.__version__
 
 setup(
     name='audioapi-cli',
-    version='0.0.1',
+    version=version(),
     description="A simple CLI which is used to give the client an easy \
         and fast access to InSoundz AudioAPI.",
     entry_points={
