@@ -36,7 +36,7 @@ class AudioAPI(object):
     def enhance_file(self, retention=None, version=DEFAULT_ENHANCE_VERSION):
         """
         Request the Audio API for a URL to upload the original audio file.
-        The function returns a Response object with a upload_url key and a
+        The function returns a json object with a upload_url key and a
         session_id key (to be later used by the enhance_status function).
 
         :param str retention:   The client can request to maintain the URL
@@ -44,9 +44,9 @@ class AudioAPI(object):
                                 for <retention> minutes.
                                 (This param is optional)
 
-        :return:                A Response object that include response.json()
-                                with a <session_id> and <upload_url> keys.
-        :rtype:                 A requests.Response object
+        :return:                A json object with a <session_id> and
+        					    <upload_url> keys.
+        :rtype:                 A json object
         """
         url = urlunsplit(('https', self._endpoint_url, f'{version}/enhance', '', ''))
 
@@ -56,7 +56,7 @@ class AudioAPI(object):
 
         response = requests.post(url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC)
         response.raise_for_status()
-        return response
+        return response.json()
 
     def enhance_status(self, session_id, version=DEFAULT_ENHANCE_VERSION):
         """
@@ -64,19 +64,18 @@ class AudioAPI(object):
         process (by sending a <session_id> which was given by enhance_file()).
 
         :param str session_id:  Was given by enhance_file().
-        :return:                A Response object that include 
-                                response.json() with the keys:
+        :return:                A json object that include the keys:
                                 #   <url> of the enhanced file in-case of
                                     <status> is "done".
                                 #   <msg> in-case of
                                     <status> is "failure".
                                 #   <status> only
                                     (of "downloading"|"processing").
-        :rtype:                 A requests.Response object 
+        :rtype:                 A json object
         """
         url = urlunsplit(('https', self._endpoint_url,
                          f'{version}/enhance/{session_id}', '', ''))
 
         response = requests.get(url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC)
         response.raise_for_status()
-        return response
+        return response.json()

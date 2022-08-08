@@ -33,12 +33,6 @@ def is_folder(path):
     else:
         return False
 
-def get_key_from_dict(key, response):
-    if key in response.json().keys():
-        return response.json()[key]
-    else:
-        raise Exception(f"Invalid key: {key}")
-
 def upload_file_with_pbar(src, dst):
     file_size = os.path.getsize(src)
     with open(src, "rb") as fd:

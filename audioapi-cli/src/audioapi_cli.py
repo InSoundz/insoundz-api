@@ -26,7 +26,9 @@ def audioapi_cli():
 )
 @click.option(
     "--src",
-    type=str,
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False,
+        readable=True, resolve_path=True),
     help="A local path of the original audio file",
     prompt="src",
     required=True,
@@ -39,7 +41,9 @@ def audioapi_cli():
 )
 @click.option(
     "--dst",
-    type=str,
+    type=click.Path(
+        exists=False, file_okay=True, dir_okay=True,
+        resolve_path=True),
     help=f"A local path to download the enhanced file [default: "
           "<current_path>/<original_filename>_enhanced.<original_suffix>]",
 )

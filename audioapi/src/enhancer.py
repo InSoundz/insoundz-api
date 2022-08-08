@@ -99,7 +99,7 @@ class AudioEnhancer(object):
             status = None
             while not time.sleep(status_interval_sec):
                 response = self._api.enhance_status(sid)
-                status = get_key_from_dict("status", response)
+                status = response["status"]
 
                 if status != prev_status:
                     self._update_job_done(sid, prev_status, status, pbar, spinner)
@@ -114,18 +114,14 @@ class AudioEnhancer(object):
 
         except Exception as e:
             self._handle_enhance_failure(sid, e, status, pbar, spinner)
-            raise Exception(e)
+            raise
 
     def _enhancement_finish(
         self, sid, status, resp, src, no_download, dst, pbar, spinner
     ):
         if status == "done":
-            url = get_key_from_dict("url", resp)
+            url = resp["url"]
             self._logger.info(f"[{sid}] Enhanced file URL is located at {url}")
-
-            if dst and validators.url(dst):
-                self._logger.warning(f"[{sid}] Invalid destination path {dst}")
-                dst = None
 
             # Downloading enhanced file
             if not no_download:
@@ -133,21 +129,24 @@ class AudioEnhancer(object):
 
         elif status == "failure" and pbar:
             spinner.stop()
-            msg = get_key_from_dict("msg", resp)
+            msg = resp["msg"]
             self._logger.error(f"[{sid}] Failure reason: {msg}")
 
         else:
             self._logger.exception(f"[{sid}] Unexpected status {status}")
 
-    def _enhancement_start(self, api, src, retention, pbar):
+    def _enhancement_start(self, api, src, dst, retention, pbar):
         self._logger.info(f"Sending a request to AudioAPI to enhance {src}")
 
         if validators.url(src):
             raise Exception(f"Invalid source path {src}")
 
+        if dst and validators.url(dst):
+            raise Exception(f"Invalid destination path {dst}")
+
         response = api.enhance_file(retention)
-        sid = get_key_from_dict("session_id", response)
-        src_url = get_key_from_dict("upload_url", response)
+        sid = response["session_id"]
+        src_url = response["upload_url"]
         self._logger.info(f"[{sid}] Uploading {src} to AudioAPI for processing.")
         upload_file(src, src_url, pbar)
 
@@ -209,38 +208,17 @@ class AudioEnhancer(object):
 
         try:
             sid = None
-            sid = self._enhancement_start(self._api, src, retention, progress_bar)
+            sid = self._enhancement_start(self._api, src, dst, retention, progress_bar)
             status, resp = self._wait_till_done(
                 sid, status_interval_sec, progress_bar, spinner
             )
-
-            # option 1:
             self._enhancement_finish(
                 sid, status, resp, src, no_download, dst, progress_bar, spinner
             )
 
-            # option 2: (the same content that is in option 1)
-            """
-            if status == "done":
-                url = get_key_from_dict("url", resp)
-                self._logger.info(f"[{sid}] Enhanced file URL is located at {url}")
+        except KeyError as e:
+            self._logger.error(f"[{sid}] invalid key {e}")
 
-                if dst and validators.url(dst):
-                    self._logger.warning(f"[{sid}] Invalid destination path {dst}")
-                    dst = None
-
-                # Downloading enhanced file
-                if not no_download:
-                    self._download_enhanced_file(sid, url, src, dst, progress_bar)
-
-            elif status == "failure" and progress_bar:
-                spinner.stop()
-                msg = get_key_from_dict("msg", resp)
-                self._logger.error(f"[{sid}] Failure reason: {msg}")
-
-            else:
-                self._logger.exception(f"[{sid}] Unexpected status {status}")
-            """
         except Exception as e:
             self._logger.error(f"[{sid}] {e}")
 
