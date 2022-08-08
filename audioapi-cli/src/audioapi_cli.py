@@ -6,12 +6,16 @@ from audioapi.enhancer import AudioEnhancer
 from audioapi_cli.version import __version__ as cli_version
 from audioapi.version import __version__ as audioapi_client
 
+
 @click.group()
 def audioapi_cli():
     pass
 
-
-@click.command("enhance-file", context_settings={"show_default": True})
+@click.command(
+    "enhance-file",
+    help="Enhance audio file",
+    context_settings={"show_default": True}
+)
 @click.option(
     "--api-token", "--api-key",
     type=str,
@@ -45,7 +49,7 @@ def audioapi_cli():
     type=click.Path(
         exists=False, file_okay=True, dir_okay=True,
         resolve_path=False),
-    help=f"A local path to download the enhanced file [default: "
+    help=f"A local path or file to download the enhanced file [default: "
           "<current_path>/<original_filename>_enhanced.<original_suffix>]",
 )
 @click.option("--retention", type=int, help="URL Retention duration [minutes]")
@@ -69,13 +73,18 @@ def enhance_file(
         src, no_download, dst, retention, status_interval, not no_progress_bar
     )
 
-@click.command("version", context_settings={"show_default": True})
+@click.command(
+    "version",
+    help="Display versions",
+    context_settings={"show_default": True}
+)
 def version():
     click.echo(f"AudioAPI-CLI    : v{cli_version}")
     click.echo(f"AudioAPI-Client : v{audioapi_client}")
 
 audioapi_cli.add_command(enhance_file)
 audioapi_cli.add_command(version)
+
 
 if __name__ == "__main__":
     audioapi_cli()
