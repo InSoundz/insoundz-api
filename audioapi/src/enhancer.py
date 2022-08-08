@@ -32,7 +32,7 @@ class AudioEnhancer(object):
         sec_counter = int(time.time() - start_time)
         return f"Session ID [{sid}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
 
-    def _update_job_done(self, sid, prev_status, status, pbar, spinner):
+    def _update_status_changed(self, sid, prev_status, status, pbar, spinner):
         if pbar and prev_status:
             if status == "failure":
                 spinner.fail()
@@ -99,7 +99,7 @@ class AudioEnhancer(object):
                 status = response["status"]
 
                 if status != prev_status:
-                    self._update_job_done(sid, prev_status, status, pbar, spinner)
+                    self._update_status_changed(sid, prev_status, status, pbar, spinner)
                     start_time = time.time()
 
                 if status == "done" or status == "failure":
