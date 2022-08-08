@@ -43,7 +43,7 @@ def audioapi_cli():
     "--dst",
     type=click.Path(
         exists=False, file_okay=True, dir_okay=True,
-        resolve_path=True),
+        resolve_path=False),
     help=f"A local path to download the enhanced file [default: "
           "<current_path>/<original_filename>_enhanced.<original_suffix>]",
 )

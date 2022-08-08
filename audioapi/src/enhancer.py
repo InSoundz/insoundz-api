@@ -85,9 +85,6 @@ class AudioEnhancer(object):
 
     def _handle_enhance_done(self, sid, url, src, no_download, dst, pbar):
         self._logger.info(f"[{sid}] Enhanced file URL is located at {url}")
-        if dst and validators.url(dst):
-            self._logger.warning(f"[{sid}] Invalid destination path {dst}")
-            dst = None
 
         # Downloading enhanced file
         if not no_download:
