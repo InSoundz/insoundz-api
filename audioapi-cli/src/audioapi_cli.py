@@ -84,6 +84,7 @@ def version():
     click.echo(f"AudioAPI-CLI    : v{cli_version}")
     click.echo(f"AudioAPI-Client : v{audioapi_client}")
 
+
 audioapi_cli.add_command(enhance_file)
 audioapi_cli.add_command(version)
 

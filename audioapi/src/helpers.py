@@ -56,7 +56,6 @@ def upload_file_no_pbar(src, dst):
         response = requests.put(dst, data=fd, timeout=DEFAULT_TIMEOUT_SEC)
         response.raise_for_status()
 
-
 def upload_file(src, dst, pbar=False):
     if pbar:
         upload_file_with_pbar(src, dst)

@@ -49,7 +49,8 @@ class AudioAPI(object):
         :rtype:                 A json object
         """
         url = urlunsplit(
-            ('https', self._endpoint_url, f'{version}/enhance', '', '')
+            ('https', self._endpoint_url, 
+            f'{version}/enhance', '', '')
         )
 
         data = {}
@@ -77,8 +78,10 @@ class AudioAPI(object):
                                     (of "downloading"|"processing").
         :rtype:                 A json object
         """
-        url = urlunsplit(('https', self._endpoint_url,
-                         f'{version}/enhance/{session_id}', '', ''))
+        url = urlunsplit(
+            ('https', self._endpoint_url,
+            f'{version}/enhance/{session_id}', '', '')
+        )
 
         response = requests.get(
             url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC
