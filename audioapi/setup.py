@@ -13,6 +13,8 @@ setup(
     install_requires=[
                         'requests',
                         'wget',
-                        'halo'
+                        'tqdm',
+                        'halo',
+                        'validators',
     ],
  )

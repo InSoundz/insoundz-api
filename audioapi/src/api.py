@@ -4,6 +4,7 @@ import logging
 
 DEFAULT_ENDPOINT_URL = "api.insoundz.io"
 DEFAULT_ENHANCE_VERSION = "v1"
+DEFAULT_TIMEOUT_SEC = 2
 
 
 class AudioAPI(object):
@@ -32,27 +33,30 @@ class AudioAPI(object):
     def get_default_endpoint_url():
         return DEFAULT_ENDPOINT_URL
 
-    def enhance_file(self, file_url, retention=None, version=DEFAULT_ENHANCE_VERSION):
+    def enhance_file(self, retention=None, version=DEFAULT_ENHANCE_VERSION):
         """
-        Send a URL of the original audio file to the Audio API for audio
-        enhancement. The function returns a JSON object with a sessionId key
-        to be later used by the enhance_status function.
+        Request the Audio API for a URL to upload the original audio file.
+        The function returns a json object with a upload_url key and a
+        session_id key (to be later used by the enhance_status function).
 
-        :param str file_url:    The URL of the original audio file for
-                                audio enhancement.
         :param str retention:   The client can request to maintain the URL
                                 of the enhanced audio file.
                                 for <retention> minutes.
                                 (This param is optional)
-        :return:                A JSON with a <sessionId>
-        :rtype:                 A JSON object
+
+        :return:                A json object with a <session_id> and
+        					    <upload_url> keys.
+        :rtype:                 A json object
         """
-        url = urlunsplit(("https", self._endpoint_url, f"{version}/enhance", "", ""))
-        data = {"file_url": file_url}
+        url = urlunsplit(('https', self._endpoint_url, f'{version}/enhance', '', ''))
+
+        data = {}
         if retention:
             data["retention"] = retention
 
-        return requests.post(url, headers=self._headers, json=data)
+        response = requests.post(url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC)
+        response.raise_for_status()
+        return response.json()
 
     def enhance_status(self, session_id, version=DEFAULT_ENHANCE_VERSION):
         """
@@ -60,16 +64,18 @@ class AudioAPI(object):
         process (by sending a <session_id> which was given by enhance_file()).
 
         :param str session_id:  Was given by enhance_file().
-        :return:                A JSON with:
+        :return:                A json object that include the keys:
                                 #   <url> of the enhanced file in-case of
                                     <status> is "done".
                                 #   <msg> in-case of
                                     <status> is "failure".
                                 #   <status> only
                                     (of "downloading"|"processing").
-        :rtype:                 A JSON object
+        :rtype:                 A json object
         """
         url = urlunsplit(('https', self._endpoint_url,
                          f'{version}/enhance/{session_id}', '', ''))
 
-        return requests.get(url, headers=self._headers)
+        response = requests.get(url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC)
+        response.raise_for_status()
+        return response.json()
