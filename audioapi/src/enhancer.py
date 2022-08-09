@@ -1,11 +1,9 @@
-import logging
-import sys
 import time
 import wget
-import os
-from urllib.parse import urlparse
+import validators
 from pathlib import Path, PurePath
 from halo import Halo
+from audioapi.helpers import *
 from audioapi.api import AudioAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
@@ -18,40 +16,39 @@ class AudioEnhancer(object):
     def __init__(
         self,
         api_token,
-        endpoint_url=AudioAPI.get_default_endpoint_url(),
-        status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC
+        endpoint_url=AudioAPI.get_default_endpoint_url()
     ):
-        self._logger = self._initialize_logger("AudioEnhancer")
-        self._api_token = api_token
-        self._endpoint_url = endpoint_url
-        self._status_interval_sec = status_interval_sec
-        self._spinner = Halo(spinner='dots', color='magenta', placement='right')
+        self._logger = initialize_logger("AudioEnhancer")
 
-    def _initialize_logger(self, logger_name):
-        logger = logging.getLogger(logger_name)
-        logger.setLevel(logging.INFO)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        kwargs = dict(
+            api_token=api_token,
+            endpoint_url=endpoint_url,
+            logger=self._logger,
         )
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setFormatter(formatter)
-        logger.addHandler(stdout_handler)
-        return logger
+        kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
+        self._api = AudioAPI(**kwargsNotNone)
 
-    def _update_job_done(self, prev_status, status):
-        if prev_status:
-            if status == "failure":
-                self._spinner.fail()
-            else:
-                self._spinner.succeed()
-
-    def _progress_text(self, session_id, status, start_time):
+    def _progress_text(self, start_time, sid, status):
         sec_counter = int(time.time() - start_time)
-        return f"Session ID [{session_id}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
+        return f"Session ID [{sid}]; Job status [{status}]; Elapsed time [{sec_counter} sec]  "
 
-    @staticmethod
-    def get_default_status_interval():
-        return DEFAULT_STATUS_INTERVAL_SEC
+    def _update_status_changed(self, sid, prev_status, status, pbar, spinner):
+        if pbar and prev_status:
+            if status == "failure":
+                spinner.fail()
+            else:
+                spinner.succeed()
+        else:
+            self._logger.info(f"[{sid}] Job status [{status}]")
+
+    def _handle_enhance_failure(self, sid, msg, status, pbar, spinner):
+        if pbar:
+            if status == "downloading" or status == "processing":
+                spinner.fail()
+            else:
+                spinner.stop()
+
+        self._logger.error(f"[{sid}] Failure reason: {msg}")
 
     def _get_default_dst_folder(self):
         return Path.cwd()
@@ -62,75 +59,101 @@ class AudioEnhancer(object):
         src_filename_suffix = PurePath(src_filename).suffix
         return src_filename_no_suffix + "_enhanced" + src_filename_suffix
 
-    def _download_enhanced_file(self, enhanced_file_url, src, dst):
+    def _download_enhanced_file(self, sid, url, src, dst, pbar):
         if dst:
             # <dst> includes the full path (including the filename)
-            if self._is_file(dst):
-                dir = PurePath(dst).parent
+            if is_file(dst):
+                folder = PurePath(dst).parent
                 filename = PurePath(dst).name
 
             # <dst> includes only the directory (without the filename)
-            elif Path(dst).is_dir():
-                dir = dst
+            elif is_folder(dst):
+                folder = dst
                 filename = self._get_default_dst_filename(src)
 
         # Use default path for download
         else:
-            dir = self._get_default_dst_folder()
+            folder = self._get_default_dst_folder()
             filename = self._get_default_dst_filename(src)
 
-        Path(dir).mkdir(parents=True, exist_ok=True)
-        dst_path = PurePath.joinpath(dir, filename)
+        Path(folder).mkdir(parents=True, exist_ok=True)
+        dst_path = os.path.join(folder, filename)
 
-        self._logger.info(f"Downloading enhanced file to {dst_path}")
-        wget.download(enhanced_file_url, str(dst_path))
-        print()  # An aesthetic linebreak
-        self._logger.info(f"{dst_path} was downloaded succesfully.")
+        self._logger.info(f"[{sid}] Downloading enhanced file to {dst_path}")
+        download_file(url, str(dst_path), pbar)
+        self._logger.info(f"[{sid}] {dst_path} was downloaded succesfully.")
 
-    def _upload_enhanced_file(self, enhanced_file_url, dst):
-        raise NotImplementedError(f"Uploading enhanced file to {dst} - yet not supported.")
-
-    def _is_url(self, path):
-        if path:
-            return urlparse(path).scheme != ""
-        else:
-            return False
-
-    def _is_file(self, path):
-        if not self._is_url(path):
-            return PurePath(path).suffix != ""
-        else:
-            return False
-
-    def _handle_enhance_file_done(
-        self, src, no_download, dst, enhanced_file_url
-    ):
-        self._spinner.stop()
-        self._logger.info(f"Enhanced file URL is located at "
-                           "{enhanced_file_url}")
-
-        # Uploading enhanced file
-        if self._is_url(dst):
-            self._upload_enhanced_file(enhanced_file_url, dst)
-            return
+    def _handle_enhance_done(self, sid, url, src, no_download, dst, pbar):
+        self._logger.info(f"[{sid}] Enhanced file URL is located at {url}")
 
         # Downloading enhanced file
         if not no_download:
-            self._download_enhanced_file(enhanced_file_url, src, dst)
+            self._download_enhanced_file(sid, url, src, dst, pbar)
 
-    def _handle_enhance_file_failure(self, msg, response):
-        self._logger.error(f"Failure reason: {msg}")
-        response.raise_for_status()
+    def _wait_till_done(self, sid, status_interval_sec, pbar, spinner):
+        try:
+            prev_status = None
+            status = None
+            while not time.sleep(status_interval_sec):
+                response = self._api.enhance_status(sid)
+                status = response["status"]
 
-    def _get_key_from_response(self, key, response):
-        if key in response.json().keys():
-            return response.json()[key]
+                if status != prev_status:
+                    self._update_status_changed(sid, prev_status, status, pbar, spinner)
+                    start_time = time.time()
+
+                if status == "done" or status == "failure":
+                    return status, response
+
+                if pbar:
+                    spinner.start(text=self._progress_text(start_time, sid, status))
+                prev_status = status
+
+        except Exception as e:
+            self._handle_enhance_failure(sid, e, status, pbar, spinner)
+            raise
+
+    def _enhancement_finish(
+        self, sid, status, resp, src, no_download, dst, pbar, spinner
+    ):
+        if status == "done":
+            url = resp["url"]
+            self._logger.info(f"[{sid}] Enhanced file URL is located at {url}")
+
+            # Downloading enhanced file
+            if not no_download:
+                self._download_enhanced_file(sid, url, src, dst, pbar)
+
+        elif status == "failure" and pbar:
+            spinner.stop()
+            msg = resp["msg"]
+            self._logger.error(f"[{sid}] Failure reason: {msg}")
+
         else:
-            self._spinner.fail()
-            self._handle_enhance_file_failure(response.json()["message"], response)
-            raise f"Invalid key: {key}"
+            self._logger.exception(f"[{sid}] Unexpected status {status}")
 
-    def enhance_file(self, src, no_download=False, dst=None, retention=None):
+    def _enhancement_start(self, api, src, dst, retention, pbar):
+        self._logger.info(f"Sending a request to AudioAPI to enhance {src}")
+
+        if validators.url(src):
+            raise Exception(f"Invalid source path {src}")
+
+        if dst and validators.url(dst):
+            raise Exception(f"Invalid destination path {dst}")
+
+        response = api.enhance_file(retention)
+        sid = response["session_id"]
+        src_url = response["upload_url"]
+        self._logger.info(f"[{sid}] Uploading {src} to AudioAPI for processing.")
+        upload_file(src, src_url, pbar)
+
+        return sid
+
+    def enhance_file(
+            self, src, no_download=False, dst=None, retention=None,
+            status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
+            progress_bar=False
+        ):
         """
         It uses the audioapi package to enhance the file that is located
         in <src>.
@@ -165,56 +188,37 @@ class AudioEnhancer(object):
                                     therefore it's not recommanded to set the
                                     <no_download> flag.
                                     (This param is optional)
+        :param int  status_interval_sec:    
+                                    The client can set the frequency of querying
+                                    the status of the audio enhancement process.
+                                    (This param is optional)
+        :param int  progress_bar:   The client can enable/disable the display of
+                                    the audio enhancement progress bar.
+                                    (This param is optional)
         :return:                    None
         :rtype:                     None
         """
 
-        kwargs = dict(
-            api_token=self._api_token,
-            endpoint_url=self._endpoint_url,
-            logger=self._logger,
-        )
-        kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
-        api = AudioAPI(**kwargsNotNone)
+        spinner = None
+        if progress_bar:
+            spinner = Halo(spinner='dots', color='magenta', placement='right')
 
         try:
-            if self._is_url(src):
-                src_url = src
-            else:
-                # Send to /enhance a request to upload.
-                # The last should return a URL to upload to.
-                raise NotImplementedError("/enhance request to upload yet not supported.")
+            sid = None
+            sid = self._enhancement_start(self._api, src, dst, retention, progress_bar)
+            status, resp = self._wait_till_done(
+                sid, status_interval_sec, progress_bar, spinner
+            )
+            self._enhancement_finish(
+                sid, status, resp, src, no_download, dst, progress_bar, spinner
+            )
 
-            # Send original file to AudioAPI
-            self._logger.info(f"Sending {src_url} to AudioAPI for processing.")
-            response = api.enhance_file(src_url, retention)
-            session_id = self._get_key_from_response("session_id", response)
-
-            # Check status
-            prev_status = None
-            while not time.sleep(self._status_interval_sec):
-                response = api.enhance_status(session_id)
-                status = self._get_key_from_response("status", response)
-                
-                if status != prev_status:
-                    self._update_job_done(prev_status, status)
-                    start_time = time.time()              
-
-                if status == "done":
-                    url = self._get_key_from_response("url", response)
-                    self._handle_enhance_file_done(src, no_download, dst, url)
-                    break
-                elif status == "failure":
-                    msg = self._get_key_from_response("msg", response)
-                    self._handle_enhance_file_failure(msg, response)
-                    break
-
-                self._spinner.start(
-                    text=self._progress_text(session_id, status, start_time)
-                )    
-
-                prev_status = status
+        except KeyError as e:
+            self._logger.error(f"[{sid}] invalid key {e}")
 
         except Exception as e:
-            self._logger.error(e)
-            self._spinner.stop()
+            self._logger.error(f"[{sid}] {e}")
+
+    @staticmethod
+    def get_default_status_interval():
+        return DEFAULT_STATUS_INTERVAL_SEC
