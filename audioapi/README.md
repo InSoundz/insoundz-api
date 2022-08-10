@@ -10,14 +10,14 @@ pip install audioapi
 ```
 
 ## Getting started: Audio file enhancement
-Sending the URL of the original file for audio enhancement processing and download the enhanced file to our local machine.
+Sending the original file for audio enhancement processing and download the enhanced file to our local machine.
 
 ```python
 from audioapi.enhancer import AudioEnhancer
 
 enhancer = AudioEnhancer(api_token="my_key")
 enhancer.enhance_file(
-    src="https://api.insoundz.io/examples/example_file.wav", 
+    src="/home/example_user/my_audio_files/example.wav", 
     dst="/home/example_user/my_enhanced_files_dir"
 )
 ```
