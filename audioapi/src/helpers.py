@@ -8,7 +8,7 @@ from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
 
 DEFAULT_CHUNK_SIZE = 65536
-DEFAULT_TIMEOUT_SEC = 5
+DEFAULT_TIMEOUT_SEC = 10
 
 
 def initialize_logger(logger_name):
