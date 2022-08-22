@@ -14,20 +14,54 @@ class AudioAPI(object):
     """
     def __init__(
             self,
-            api_token,
+            client_id=None,
+            secret=None,
             endpoint_url=DEFAULT_ENDPOINT_URL,
             logger=None):
-        self._api_token = api_token
+        self._headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }
+
         self._endpoint_url = endpoint_url
+        auth_token, _ = self.account_token(client_id, secret)
+        self.set_auth_token(auth_token)
+
         self._logger = logger
         if not self._logger:
             self._logger = logging.getLogger(__class__.__name__)
             self._logger.addHandler(logging.NullHandler())
-        self._headers = {
-            "Authorization": self._api_token,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
+
+    def set_auth_token(self, auth_token):
+        self._auth_token = auth_token
+        self._headers.update({ "Authorization": auth_token })
+
+    def account_token(self, client_id, secret, version=DEFAULT_ENHANCE_VERSION):
+        """
+        Based on client_id and secret from the User Management System,
+        retrieve an JWT Token
+        """
+        url = urlunsplit(
+            ('https', self._endpoint_url,
+            f'{version}/account/token', '', '')
+        )
+
+        data = {
+            "client_id": client_id,
+            "secret": secret
         }
+
+        response = requests.post(
+            url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC
+        )
+
+        response.raise_for_status()
+
+        response = response.json()
+        token = response["token"]
+        expires = response["expires"]
+
+        return token, expires
 
     @staticmethod
     def get_default_endpoint_url():
@@ -49,7 +83,7 @@ class AudioAPI(object):
         :rtype:                 A json object
         """
         url = urlunsplit(
-            ('https', self._endpoint_url, 
+            ('https', self._endpoint_url,
             f'{version}/enhance', '', '')
         )
 

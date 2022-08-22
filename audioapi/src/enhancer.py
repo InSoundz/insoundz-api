@@ -15,13 +15,15 @@ class AudioEnhancer(object):
     """
     def __init__(
         self,
-        api_token,
+        client_id,
+        secret,
         endpoint_url=AudioAPI.get_default_endpoint_url()
     ):
         self._logger = initialize_logger("AudioEnhancer")
 
         kwargs = dict(
-            api_token=api_token,
+            client_id=client_id,
+            secret=secret,
             endpoint_url=endpoint_url,
             logger=self._logger,
         )

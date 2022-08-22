@@ -18,10 +18,17 @@ def audioapi_cli():
     context_settings={"show_default": True}
 )
 @click.option(
-    "--api-token", "--api-key",
+    "--client-id",
     type=str,
-    help="Authentication key to access InSoundz AudioAPI services",
-    prompt="API token",
+    help="Client ID for InSoundz AudioAPI services",
+    prompt="Client ID",
+    required=True,
+)
+@click.option(
+    "--secret",
+    type=str,
+    help="Secret key to access InSoundz AudioAPI services",
+    prompt="Secret",
     required=True,
 )
 @click.option(
@@ -66,10 +73,10 @@ def audioapi_cli():
     help="If set, progress-bar won't be displayed ",
 )
 def enhance_file(
-    api_token=None, endpoint_url=None, src=None, no_download=False,
+    client_id, secret, endpoint_url=None, src=None, no_download=False,
     dst=None, retention=None, status_interval=None, no_progress_bar=False
 ):
-    enhancer = AudioEnhancer(api_token, endpoint_url)
+    enhancer = AudioEnhancer(client_id, secret, endpoint_url)
     enhancer.enhance_file(
         src, no_download, dst, retention, status_interval, not no_progress_bar
     )
