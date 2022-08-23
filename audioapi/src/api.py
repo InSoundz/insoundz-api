@@ -14,8 +14,8 @@ class AudioAPI(object):
     """
     def __init__(
             self,
-            client_id=None,
-            secret=None,
+            client_id,
+            secret,
             endpoint_url=DEFAULT_ENDPOINT_URL,
             logger=None):
         self._headers = {
