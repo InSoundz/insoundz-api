@@ -15,7 +15,7 @@ Sending the original file for audio enhancement processing and download the enha
 ```python
 from audioapi.enhancer import AudioEnhancer
 
-enhancer = AudioEnhancer(api_token="my_key")
+enhancer = AudioEnhancer(client_id="my_client_id", secret="my_secret")
 enhancer.enhance_file(
     src="/home/example_user/my_audio_files/example.wav", 
     dst="/home/example_user/my_enhanced_files_dir"
