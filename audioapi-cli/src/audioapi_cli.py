@@ -1,13 +1,44 @@
 #!/usr/bin/env python
 
 import click
+import click_creds
 from audioapi.api import AudioAPI
 from audioapi.enhancer import AudioEnhancer
 from audioapi_cli.version import __version__ as cli_version
 from audioapi.version import __version__ as audioapi_client
 
 
-@click.group()
+def get_credentials(credentials, client_id, secret, url):
+    if not client_id and credentials["client_id"] and credentials["client_id"] != "None":
+        client_id = credentials["client_id"]
+
+    if not secret and credentials["secret"] and credentials["secret"] != "None":
+        secret = credentials["secret"]
+
+    if not url and credentials["url"] and credentials["url"] != "None":
+        url = credentials["url"]
+
+    if not client_id:
+        click.echo('Client ID is missing. To globaly set your client-id please run:')
+        click.echo('audioapi_cli config set --client_id "XXXX-XXXX-XXXX-XXXX"')
+        raise SystemExit()
+
+    if not secret:
+        click.echo('Secret key is missing. To globaly set your secret key please run:')
+        click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
+        raise SystemExit()
+
+    if not url:
+        url = AudioAPI.get_default_endpoint_url()
+
+    return client_id, secret, url
+
+
+@click.group(context_settings=dict(help_option_names=["-h", "--help"]))
+@click_creds.use_netrcstore(
+    name="audioapi-cli",
+    mapping={"login": "client_id", "password": "secret", "account": "url"}
+)
 def audioapi_cli():
     pass
 
@@ -20,22 +51,24 @@ def audioapi_cli():
 @click.option(
     "--client-id",
     type=str,
-    help="Client ID for InSoundz AudioAPI services",
-    prompt="Client ID",
-    required=True,
+    help="Client ID for InSoundz AudioAPI services. "
+         "If not set, the CLI uses the globaliy configured client ID. "
+         "If set, the CLI will use this client ID only for this session",
 )
 @click.option(
     "--secret",
     type=str,
-    help="Secret key to access InSoundz AudioAPI services",
-    prompt="Secret",
-    required=True,
+    help="Secret key to access InSoundz AudioAPI services. "
+         "If not set, the CLI uses the globaliy configured secret key. "
+         "If set, the CLI will use this secret key only for this session",
 )
 @click.option(
-    "--endpoint-url",
+    "--url",
     type=str,
-    help="Use an alternative endpoint URL (without the 'http://' prefix)",
-    default=AudioAPI.get_default_endpoint_url(),
+    help="Use an alternative endpoint URL (without the 'http://' prefix). "
+         "If not set, the CLI uses the globaliy configured url. "
+         "If set, the CLI will use this url only for this session. "
+        f"If both not set and not globaliy configured, the CLI will use the default url",
 )
 @click.option(
     "--src",
@@ -72,11 +105,18 @@ def audioapi_cli():
     is_flag=True,
     help="If set, progress-bar won't be displayed ",
 )
+@click_creds.pass_netrcstore_obj
 def enhance_file(
-    client_id, secret, endpoint_url=None, src=None, no_download=False,
+    store: click_creds.NetrcStore,
+    client_id=None, secret=None, url=None,
+    src=None, no_download=False,
     dst=None, retention=None, status_interval=None, no_progress_bar=False
 ):
-    enhancer = AudioEnhancer(client_id, secret, endpoint_url)
+    client_id, secret, url = get_credentials(
+        store.host_with_mapping, client_id, secret, url
+    )
+
+    enhancer = AudioEnhancer(client_id, secret, url)
     enhancer.enhance_file(
         src, no_download, dst, retention, status_interval, not no_progress_bar
     )
@@ -92,6 +132,7 @@ def version():
     click.echo(f"AudioAPI-Client : v{audioapi_client}")
 
 
+audioapi_cli.add_command(click_creds.config_group)
 audioapi_cli.add_command(enhance_file)
 audioapi_cli.add_command(version)
 
