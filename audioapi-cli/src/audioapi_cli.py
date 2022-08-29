@@ -9,22 +9,30 @@ from audioapi.version import __version__ as audioapi_client
 
 
 def get_credentials(credentials, client_id, secret, url):
-    if not client_id and credentials["client_id"] and credentials["client_id"] != "None":
-        client_id = credentials["client_id"]
+    if not client_id and credentials["client-id"] and \
+            credentials["client-id"] != "None":
+        client_id = credentials["client-id"]
 
-    if not secret and credentials["secret"] and credentials["secret"] != "None":
+    if not secret and credentials["secret"] and \
+            credentials["secret"] != "None":
         secret = credentials["secret"]
 
     if not url and credentials["url"] and credentials["url"] != "None":
         url = credentials["url"]
 
     if not client_id:
-        click.echo('Client ID is missing. To globaly set your client-id please run:')
-        click.echo('audioapi_cli config set --client_id "XXXX-XXXX-XXXX-XXXX"')
+        click.echo(
+            'Client ID is missing. '
+            'To permently set your client-id please run:'
+        )
+        click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
         raise SystemExit()
 
     if not secret:
-        click.echo('Secret key is missing. To globaly set your secret key please run:')
+        click.echo(
+            'Secret key is missing. '
+            'To permently set your secret key please run:'
+        )
         click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
         raise SystemExit()
 
@@ -37,7 +45,7 @@ def get_credentials(credentials, client_id, secret, url):
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 @click_creds.use_netrcstore(
     name="audioapi-cli",
-    mapping={"login": "client_id", "password": "secret", "account": "url"}
+    mapping={"login": "client-id", "password": "secret", "account": "url"}
 )
 def audioapi_cli():
     pass
@@ -52,23 +60,25 @@ def audioapi_cli():
     "--client-id",
     type=str,
     help="Client ID for InSoundz AudioAPI services. "
-         "If not set, the CLI uses the globaliy configured client ID. "
+         "If not set, the CLI uses the permently configured client ID. "
          "If set, the CLI will use this client ID only for this session",
 )
 @click.option(
     "--secret",
     type=str,
     help="Secret key to access InSoundz AudioAPI services. "
-         "If not set, the CLI uses the globaliy configured secret key. "
+         "If not set, the CLI uses the permently configured secret key. "
          "If set, the CLI will use this secret key only for this session",
 )
 @click.option(
     "--url",
     type=str,
     help="Use an alternative endpoint URL (without the 'http://' prefix). "
-         "If not set, the CLI uses the globaliy configured url. "
+         "If not set, the CLI uses the permently configured url. "
          "If set, the CLI will use this url only for this session. "
-        f"If both not set and not globaliy configured, the CLI will use the default url",
+         "If not set and not permently configured, "
+         "the CLI will use the default url "
+         f"[default: {AudioAPI.get_default_endpoint_url()}]",
 )
 @click.option(
     "--src",
