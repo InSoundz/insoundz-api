@@ -8,36 +8,19 @@ from audioapi_cli.version import __version__ as cli_version
 from audioapi.version import __version__ as audioapi_client
 
 
-def get_credentials(credentials, client_id, secret, url):
-    if not client_id and credentials["client-id"] and \
-            credentials["client-id"] != "None":
-        client_id = credentials["client-id"]
+def get_credentials(cred_store):
+    client_id = cred_store.host_with_mapping["client-id"]
+    secret = cred_store.host_with_mapping["secret"]
+    url = cred_store.host_with_mapping["url"]
 
-    if not secret and credentials["secret"] and \
-            credentials["secret"] != "None":
-        secret = credentials["secret"]
+    if client_id == "None":
+        client_id = None
 
-    if not url and credentials["url"] and credentials["url"] != "None":
-        url = credentials["url"]
+    if secret == "None":
+        secret = None
 
-    if not client_id:
-        click.echo(
-            'Client ID is missing. '
-            'To permanently set your client-id please run:'
-        )
-        click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
-        raise SystemExit()
-
-    if not secret:
-        click.echo(
-            'Secret key is missing. '
-            'To permanently set your secret key please run:'
-        )
-        click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
-        raise SystemExit()
-
-    if not url:
-        url = AudioAPI.get_default_endpoint_url()
+    if url == "None":
+        url = None
 
     return client_id, secret, url
 
@@ -47,8 +30,10 @@ def get_credentials(credentials, client_id, secret, url):
     name="audioapi-cli",
     mapping={"login": "client-id", "password": "secret", "account": "url"}
 )
-def audioapi_cli():
-    pass
+@click_creds.pass_netrcstore_obj
+def audioapi_cli(cred_store: click_creds.NetrcStore):
+    global client_id, secret, url
+    client_id, secret, url = get_credentials(cred_store)
 
 
 @click.command(
@@ -115,16 +100,38 @@ def audioapi_cli():
     is_flag=True,
     help="If set, progress-bar won't be displayed ",
 )
-@click_creds.pass_netrcstore_obj
 def enhance_file(
-    store: click_creds.NetrcStore,
     client_id=None, secret=None, url=None,
     src=None, no_download=False,
     dst=None, retention=None, status_interval=None, no_progress_bar=False
 ):
-    client_id, secret, url = get_credentials(
-        store.host_with_mapping, client_id, secret, url
-    )
+    if not client_id:
+        client_id = globals()['client_id']
+
+        if not client_id:
+            click.echo(
+                'Client ID is missing. '
+                'To permanently set your client-id please run:'
+            )
+            click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
+            raise SystemExit()
+
+    if not secret:
+        secret = globals()['secret']
+
+        if not secret:
+            click.echo(
+                'Secret key is missing. '
+                'To permanently set your secret key please run:'
+            )
+            click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
+            raise SystemExit()
+
+    if not url:
+        url = globals()['url']
+
+        if not url:
+            url = AudioAPI.get_default_endpoint_url()
 
     enhancer = AudioEnhancer(client_id, secret, url)
     enhancer.enhance_file(
