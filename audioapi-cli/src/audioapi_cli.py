@@ -23,7 +23,7 @@ def get_credentials(credentials, client_id, secret, url):
     if not client_id:
         click.echo(
             'Client ID is missing. '
-            'To permently set your client-id please run:'
+            'To permanently set your client-id please run:'
         )
         click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
         raise SystemExit()
@@ -31,7 +31,7 @@ def get_credentials(credentials, client_id, secret, url):
     if not secret:
         click.echo(
             'Secret key is missing. '
-            'To permently set your secret key please run:'
+            'To permanently set your secret key please run:'
         )
         click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
         raise SystemExit()
@@ -60,23 +60,23 @@ def audioapi_cli():
     "--client-id",
     type=str,
     help="Client ID for InSoundz AudioAPI services. "
-         "If not set, the CLI uses the permently configured client ID. "
+         "If not set, the CLI uses the permanently configured client ID. "
          "If set, the CLI will use this client ID only for this session",
 )
 @click.option(
     "--secret",
     type=str,
     help="Secret key to access InSoundz AudioAPI services. "
-         "If not set, the CLI uses the permently configured secret key. "
+         "If not set, the CLI uses the permanently configured secret key. "
          "If set, the CLI will use this secret key only for this session",
 )
 @click.option(
     "--url",
     type=str,
     help="Use an alternative endpoint URL (without the 'http://' prefix). "
-         "If not set, the CLI uses the permently configured url. "
+         "If not set, the CLI uses the permanently configured url. "
          "If set, the CLI will use this url only for this session. "
-         "If not set and not permently configured, "
+         "If not set and not permanently configured, "
          "the CLI will use the default url "
          f"[default: {AudioAPI.get_default_endpoint_url()}]",
 )
