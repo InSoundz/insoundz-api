@@ -25,6 +25,52 @@ def get_credentials(cred_store):
     return client_id, secret, url
 
 
+def get_client_id(ctx, param, value):
+    client_id = value
+
+    if not client_id:
+        client_id = g_client_id
+
+        if not client_id:
+            click.echo(
+                'Client ID is missing. '
+                'To permanently set your client-id please run:'
+            )
+            click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
+            ctx.exit()
+
+    return client_id
+
+
+def get_secret(ctx, param, value):
+    secret = value
+
+    if not secret:
+        secret = g_secret
+
+        if not secret:
+            click.echo(
+                'Secret key is missing. '
+                'To permanently set your secret-key please run:'
+            )
+            click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
+            ctx.exit()
+
+    return secret
+
+
+def get_url(ctx, param, value):
+    url = value
+
+    if not url:
+        url = g_url
+
+        if not url:
+            url = AudioAPI.get_default_endpoint_url()
+
+    return url
+
+
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 @click_creds.use_netrcstore(
     name="audioapi-cli",
@@ -32,8 +78,8 @@ def get_credentials(cred_store):
 )
 @click_creds.pass_netrcstore_obj
 def audioapi_cli(cred_store: click_creds.NetrcStore):
-    global client_id, secret, url
-    client_id, secret, url = get_credentials(cred_store)
+    global g_client_id, g_secret, g_url
+    g_client_id, g_secret, g_url = get_credentials(cred_store)
 
 
 @click.command(
@@ -47,6 +93,7 @@ def audioapi_cli(cred_store: click_creds.NetrcStore):
     help="Client ID for InSoundz AudioAPI services. "
          "If not set, the CLI uses the permanently configured client ID. "
          "If set, the CLI will use this client ID only for this session",
+    callback=get_client_id,
 )
 @click.option(
     "--secret",
@@ -54,6 +101,7 @@ def audioapi_cli(cred_store: click_creds.NetrcStore):
     help="Secret key to access InSoundz AudioAPI services. "
          "If not set, the CLI uses the permanently configured secret key. "
          "If set, the CLI will use this secret key only for this session",
+    callback=get_secret,
 )
 @click.option(
     "--url",
@@ -64,6 +112,7 @@ def audioapi_cli(cred_store: click_creds.NetrcStore):
          "If not set and not permanently configured, "
          "the CLI will use the default url "
          f"[default: {AudioAPI.get_default_endpoint_url()}]",
+    callback=get_url,
 )
 @click.option(
     "--src",
@@ -101,38 +150,10 @@ def audioapi_cli(cred_store: click_creds.NetrcStore):
     help="If set, progress-bar won't be displayed ",
 )
 def enhance_file(
-    client_id=None, secret=None, url=None,
+    client_id, secret, url,
     src=None, no_download=False,
     dst=None, retention=None, status_interval=None, no_progress_bar=False
 ):
-    if not client_id:
-        client_id = globals()['client_id']
-
-        if not client_id:
-            click.echo(
-                'Client ID is missing. '
-                'To permanently set your client-id please run:'
-            )
-            click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
-            raise SystemExit()
-
-    if not secret:
-        secret = globals()['secret']
-
-        if not secret:
-            click.echo(
-                'Secret key is missing. '
-                'To permanently set your secret key please run:'
-            )
-            click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
-            raise SystemExit()
-
-    if not url:
-        url = globals()['url']
-
-        if not url:
-            url = AudioAPI.get_default_endpoint_url()
-
     enhancer = AudioEnhancer(client_id, secret, url)
     enhancer.enhance_file(
         src, no_download, dst, retention, status_interval, not no_progress_bar
