@@ -2,10 +2,10 @@
 
 import click
 import click_creds
-from audioapi.api import AudioAPI
-from audioapi.enhancer import AudioEnhancer
-from audioapi_cli.version import __version__ as cli_version
-from audioapi.version import __version__ as audioapi_client
+from insoundz_api.api import insoundzAPI
+from insoundz_api.enhancer import AudioEnhancer
+from insoundz_cli.version import __version__ as cli_version
+from insoundz_api.version import __version__ as api_client
 
 
 def get_credentials(cred_store):
@@ -36,7 +36,7 @@ def get_client_id(ctx, param, value):
                 'Client ID is missing. '
                 'To permanently set your client-id please run:'
             )
-            click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
+            click.echo('insoundz_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
             ctx.exit()
 
     return client_id
@@ -53,7 +53,7 @@ def get_secret(ctx, param, value):
                 'Secret key is missing. '
                 'To permanently set your secret-key please run:'
             )
-            click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
+            click.echo('insoundz_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
             ctx.exit()
 
     return secret
@@ -66,18 +66,18 @@ def get_url(ctx, param, value):
         url = g_url
 
         if not url:
-            url = AudioAPI.get_default_endpoint_url()
+            url = insoundzAPI.get_default_endpoint_url()
 
     return url
 
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 @click_creds.use_netrcstore(
-    name="audioapi-cli",
+    name="insoundzAPI",
     mapping={"login": "client-id", "password": "secret", "account": "url"}
 )
 @click_creds.pass_netrcstore_obj
-def audioapi_cli(cred_store: click_creds.NetrcStore):
+def insoundz_cli(cred_store: click_creds.NetrcStore):
     global g_client_id, g_secret, g_url
     g_client_id, g_secret, g_url = get_credentials(cred_store)
 
@@ -90,7 +90,7 @@ def audioapi_cli(cred_store: click_creds.NetrcStore):
 @click.option(
     "--client-id",
     type=str,
-    help="Client ID for InSoundz AudioAPI services. "
+    help="Client ID for insoundz API services. "
          "If not set, the CLI uses the permanently configured client ID. "
          "If set, the CLI will use this client ID only for this session",
     callback=get_client_id,
@@ -98,7 +98,7 @@ def audioapi_cli(cred_store: click_creds.NetrcStore):
 @click.option(
     "--secret",
     type=str,
-    help="Secret key to access InSoundz AudioAPI services. "
+    help="Secret key to access insoundz API services. "
          "If not set, the CLI uses the permanently configured secret key. "
          "If set, the CLI will use this secret key only for this session",
     callback=get_secret,
@@ -111,7 +111,7 @@ def audioapi_cli(cred_store: click_creds.NetrcStore):
          "If set, the CLI will use this url only for this session. "
          "If not set and not permanently configured, "
          "the CLI will use the default url "
-         f"[default: {AudioAPI.get_default_endpoint_url()}]",
+         f"[default: {insoundzAPI.get_default_endpoint_url()}]",
     callback=get_url,
 )
 @click.option(
@@ -166,14 +166,14 @@ def enhance_file(
     context_settings={"show_default": True}
 )
 def version():
-    click.echo(f"AudioAPI-CLI    : v{cli_version}")
-    click.echo(f"AudioAPI-Client : v{audioapi_client}")
+    click.echo(f"insoundzAPI-CLI    : v{cli_version}")
+    click.echo(f"insoundzAPI-Client : v{api_client}")
 
 
-audioapi_cli.add_command(click_creds.config_group)
-audioapi_cli.add_command(enhance_file)
-audioapi_cli.add_command(version)
+insoundz_cli.add_command(click_creds.config_group)
+insoundz_cli.add_command(enhance_file)
+insoundz_cli.add_command(version)
 
 
 if __name__ == "__main__":
-    audioapi_cli()
+    insoundz_cli()

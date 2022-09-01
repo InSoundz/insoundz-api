@@ -7,10 +7,9 @@ DEFAULT_ENHANCE_VERSION = "v1"
 DEFAULT_TIMEOUT_SEC = 10
 
 
-class AudioAPI(object):
+class insoundzAPI(object):
     """
-    A basic and a simple class implementation of an audioapi client
-    to access InSoundz AudioAPI.
+    A basic and simple class implementation of insoundz API client.
     """
     def __init__(
             self,

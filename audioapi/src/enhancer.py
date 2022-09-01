@@ -3,21 +3,21 @@ import wget
 import validators
 from pathlib import Path, PurePath
 from halo import Halo
-from audioapi.helpers import *
-from audioapi.api import AudioAPI
+from insoundz_api.helpers import *
+from insoundz_api.api import insoundzAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
 
 
 class AudioEnhancer(object):
     """
-    A wrapper for the audioapi client to produce audio enhancement.
+    A wrapper for the insoundzAPI client to produce audio enhancement.
     """
     def __init__(
         self,
         client_id,
         secret,
-        endpoint_url=AudioAPI.get_default_endpoint_url()
+        endpoint_url=insoundzAPI.get_default_endpoint_url()
     ):
         self._logger = initialize_logger("AudioEnhancer")
 
@@ -28,7 +28,7 @@ class AudioEnhancer(object):
             logger=self._logger,
         )
         kwargsNotNone = {k: v for k, v in kwargs.items() if v is not None}
-        self._api = AudioAPI(**kwargsNotNone)
+        self._api = insoundzAPI(**kwargsNotNone)
 
     def _progress_text(self, start_time, sid, status):
         sec_counter = int(time.time() - start_time)
@@ -139,7 +139,7 @@ class AudioEnhancer(object):
             self._logger.exception(f"[{sid}] Unexpected status {status}")
 
     def _enhancement_start(self, api, src, dst, retention, pbar):
-        self._logger.info(f"Sending a request to AudioAPI to enhance {src}")
+        self._logger.info(f"Sending a request to insoundzAPI to enhance {src}")
 
         if validators.url(src):
             raise Exception(f"Invalid source path {src}")
@@ -150,7 +150,7 @@ class AudioEnhancer(object):
         sid, src_url = api.enhance_file(retention)
 
         self._logger.info(
-            f"[{sid}] Uploading {src} to AudioAPI for processing."
+            f"[{sid}] Uploading {src} to insoundzAPI for processing."
         )
         upload_file(src, src_url, pbar)
 
@@ -162,7 +162,7 @@ class AudioEnhancer(object):
         progress_bar=False
     ):
         """
-        It uses the audioapi package to enhance the file that is located
+        It uses insoundz_api package to enhance the file that is located
         in <src>.
         After the audio enhancement process is done, the URL of the new and
         enhanced file will be displayed.
@@ -187,7 +187,7 @@ class AudioEnhancer(object):
                                     <original_filename>_enhanced.wav (unless
                                     the <no_download> flag is set).
                                     (This param is optional)
-        :param int  retention:      The client can request the audioapi to keep
+        :param int  retention:      The client can request insoundzAPI to keep
                                     the URL of the enhanced file alive for a
                                     <retention> minutes (retention time).
                                     Otherwise there is no guarantee for how
