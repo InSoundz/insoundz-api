@@ -11,7 +11,7 @@ DEFAULT_STATUS_INTERVAL_SEC = 0.5
 
 class AudioEnhancer(object):
     """
-    A wrapper for the insoundzAPI client to produce audio enhancement.
+    A wrapper for insoundz API client to produce audio enhancement.
     """
     def __init__(
         self,

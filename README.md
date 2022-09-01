@@ -4,8 +4,8 @@ The insoundzAPI library includes the insoundz_api package and the insoundz_cli p
 <br />
 <br />
 
-# insoundz_cli Package
-A simple CLI which is used to give the client an easy and fast access to insoundz API (based uppon the insoundz_api package).
+# insoundz-cli Package
+A simple CLI which is used to give the client an easy and fast access to insoundz API (based uppon the insoundz-api package).
 <br />
 
 ### Installation and Getting started
@@ -13,7 +13,7 @@ A simple CLI which is used to give the client an easy and fast access to insound
 <br />
 <br />
 
-# insoundz_api Package
+# insoundz-api Package
 Insoundz API client implementation to produce audio enhancement.
 <br />
 
