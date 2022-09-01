@@ -19,7 +19,7 @@ setup(
         and fast access to insoundz API.",
     entry_points={
         "console_scripts":
-            ["insoundz_cli=insoundz_cli.insoundz_cli:insoundz_cli"]
+            ["insoundz_cli=insoundz_cli.cli:insoundz_cli"]
     },
     readme="README.md",
     license_files=('LICENSE',),
