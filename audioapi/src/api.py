@@ -34,9 +34,11 @@ class AudioAPI(object):
 
     def set_auth_token(self, auth_token):
         self._auth_token = auth_token
-        self._headers.update({ "Authorization": auth_token })
+        self._headers.update({"Authorization": auth_token})
 
-    def account_token(self, client_id, secret, version=DEFAULT_ENHANCE_VERSION):
+    def account_token(
+        self, client_id, secret, version=DEFAULT_ENHANCE_VERSION
+    ):
         """
         Based on client_id and secret from the User Management System,
         retrieve an JWT Token
@@ -70,17 +72,16 @@ class AudioAPI(object):
     def enhance_file(self, retention=None, version=DEFAULT_ENHANCE_VERSION):
         """
         Request the Audio API for a URL to upload the original audio file.
-        The function returns a json object with a upload_url key and a
-        session_id key (to be later used by the enhance_status function).
+        The function returns an upload_url and a session_id
+        (to be later used by the enhance_status function).
 
         :param str retention:   The client can request to maintain the URL
                                 of the enhanced audio file.
                                 for <retention> minutes.
                                 (This param is optional)
 
-        :return:                A json object with a <session_id> and
-                                <upload_url> keys.
-        :rtype:                 A json object
+        :return:                A <session_id> and an <upload_url>.
+        :rtype:                 Tuple
         """
         url = urlunsplit(
             ('https', self._endpoint_url,
@@ -94,23 +95,28 @@ class AudioAPI(object):
         response = requests.post(
             url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC
         )
+
         response.raise_for_status()
-        return response.json()
+
+        response = response.json()
+        sid = response["session_id"]
+        src_url = response["upload_url"]
+
+        return sid, src_url
 
     def enhance_status(self, session_id, version=DEFAULT_ENHANCE_VERSION):
         """
         Checks the status of the audio file that is under audio enhancement
         process (by sending a <session_id> which was given by enhance_file()).
+        The function returns the status and additional info.
 
         :param str session_id:  Was given by enhance_file().
-        :return:                A json object that include the keys:
-                                #   <url> of the enhanced file in-case of
-                                    <status> is "done".
-                                #   <msg> in-case of
-                                    <status> is "failure".
-                                #   <status> only
-                                    (of "downloading"|"processing").
-        :rtype:                 A json object
+        :return:                A <status> and <resp_info>.
+                                #   <resp_info> will contain a url of the
+                                    enhanced file in-case of <status> is "done"
+                                #   <resp_info> will contain the failure
+                                    details in-case of <status> is "failure"
+        :rtype:                 Tuple
         """
         url = urlunsplit(
             ('https', self._endpoint_url,
@@ -120,5 +126,17 @@ class AudioAPI(object):
         response = requests.get(
             url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC
         )
+
         response.raise_for_status()
-        return response.json()
+
+        response = response.json()
+        status = response["status"]
+
+        if status == "done":
+            resp_info = response["url"]
+        elif status == "failure":
+            resp_info = response["msg"]
+        else:
+            resp_info = None
+
+        return status, resp_info
