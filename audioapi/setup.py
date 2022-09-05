@@ -28,5 +28,6 @@ setup(
                         'tqdm',
                         'halo',
                         'validators',
+                        'shutil',
     ],
  )
