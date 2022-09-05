@@ -111,8 +111,6 @@ class insoundzAPI(object):
 
         :param str session_id:  Was given by enhance_file().
         :return:                A <status> and <resp_info>.
-                                #   <status> will contain one of the following:
-                                    downloading, processing, done
                                 #   <resp_info> will contain a url of the
                                     enhanced file in-case of <status> is "done"
                                 #   <resp_info> will contain the failure
