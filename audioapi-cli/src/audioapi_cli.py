@@ -1,15 +1,85 @@
 #!/usr/bin/env python
 
 import click
+import click_creds
 from audioapi.api import AudioAPI
 from audioapi.enhancer import AudioEnhancer
 from audioapi_cli.version import __version__ as cli_version
 from audioapi.version import __version__ as audioapi_client
 
 
-@click.group()
-def audioapi_cli():
-    pass
+def get_credentials(cred_store):
+    client_id = cred_store.host_with_mapping["client-id"]
+    secret = cred_store.host_with_mapping["secret"]
+    url = cred_store.host_with_mapping["url"]
+
+    if client_id == "None":
+        client_id = None
+
+    if secret == "None":
+        secret = None
+
+    if url == "None":
+        url = None
+
+    return client_id, secret, url
+
+
+def get_client_id(ctx, param, value):
+    client_id = value
+
+    if not client_id:
+        client_id = g_client_id
+
+        if not client_id:
+            click.echo(
+                'Client ID is missing. '
+                'To permanently set your client-id please run:'
+            )
+            click.echo('audioapi_cli config set --client-id "XXXX-XXXX-XXXX-XXXX"')
+            ctx.exit()
+
+    return client_id
+
+
+def get_secret(ctx, param, value):
+    secret = value
+
+    if not secret:
+        secret = g_secret
+
+        if not secret:
+            click.echo(
+                'Secret key is missing. '
+                'To permanently set your secret-key please run:'
+            )
+            click.echo('audioapi_cli config set --secret "XXXX-XXXX-XXXX-XXXX"')
+            ctx.exit()
+
+    return secret
+
+
+def get_url(ctx, param, value):
+    url = value
+
+    if not url:
+        url = g_url
+
+        if not url:
+            url = AudioAPI.get_default_endpoint_url()
+
+    return url
+
+
+@click.group(context_settings=dict(help_option_names=["-h", "--help"]))
+@click_creds.use_netrcstore(
+    name="audioapi-cli",
+    mapping={"login": "client-id", "password": "secret", "account": "url"}
+)
+@click_creds.pass_netrcstore_obj
+def audioapi_cli(cred_store: click_creds.NetrcStore):
+    global g_client_id, g_secret, g_url
+    g_client_id, g_secret, g_url = get_credentials(cred_store)
 
 
 @click.command(
@@ -20,22 +90,29 @@ def audioapi_cli():
 @click.option(
     "--client-id",
     type=str,
-    help="Client ID for InSoundz AudioAPI services",
-    prompt="Client ID",
-    required=True,
+    help="Client ID for InSoundz AudioAPI services. "
+         "If not set, the CLI uses the permanently configured client ID. "
+         "If set, the CLI will use this client ID only for this session",
+    callback=get_client_id,
 )
 @click.option(
     "--secret",
     type=str,
-    help="Secret key to access InSoundz AudioAPI services",
-    prompt="Secret",
-    required=True,
+    help="Secret key to access InSoundz AudioAPI services. "
+         "If not set, the CLI uses the permanently configured secret key. "
+         "If set, the CLI will use this secret key only for this session",
+    callback=get_secret,
 )
 @click.option(
-    "--endpoint-url",
+    "--url",
     type=str,
-    help="Use an alternative endpoint URL (without the 'http://' prefix)",
-    default=AudioAPI.get_default_endpoint_url(),
+    help="Use an alternative endpoint URL (without the 'http://' prefix). "
+         "If not set, the CLI uses the permanently configured url. "
+         "If set, the CLI will use this url only for this session. "
+         "If not set and not permanently configured, "
+         "the CLI will use the default url "
+         f"[default: {AudioAPI.get_default_endpoint_url()}]",
+    callback=get_url,
 )
 @click.option(
     "--src",
@@ -73,10 +150,11 @@ def audioapi_cli():
     help="If set, progress-bar won't be displayed ",
 )
 def enhance_file(
-    client_id, secret, endpoint_url=None, src=None, no_download=False,
+    client_id, secret, url,
+    src=None, no_download=False,
     dst=None, retention=None, status_interval=None, no_progress_bar=False
 ):
-    enhancer = AudioEnhancer(client_id, secret, endpoint_url)
+    enhancer = AudioEnhancer(client_id, secret, url)
     enhancer.enhance_file(
         src, no_download, dst, retention, status_interval, not no_progress_bar
     )
@@ -92,6 +170,7 @@ def version():
     click.echo(f"AudioAPI-Client : v{audioapi_client}")
 
 
+audioapi_cli.add_command(click_creds.config_group)
 audioapi_cli.add_command(enhance_file)
 audioapi_cli.add_command(version)
 
