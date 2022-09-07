@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 import validators
+import shutil
 from pathlib import PurePath
 from tqdm import tqdm
 from tqdm.utils import CallbackIOWrapper
@@ -79,18 +80,17 @@ def download_file_with_pbar(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
             fd.write(chunk)
 
 
-def download_file_no_pbar(src, dst, chunk_size=DEFAULT_CHUNK_SIZE):
+def download_file_no_pbar(src, dst):
     with requests.get(
         src, stream=True, timeout=DEFAULT_TIMEOUT_SEC
     ) as response:
         response.raise_for_status()
-        with open(dst, 'wb') as fd:
-            for chunk in response.iter_content(chunk_size):
-                fd.write(chunk)
+        with open(dst, 'wb') as f:
+            shutil.copyfileobj(response.raw, f)
 
 
 def download_file(src, dst, chunk_size=DEFAULT_CHUNK_SIZE, pbar=False):
     if pbar:
         download_file_with_pbar(src, dst, chunk_size)
     else:
-        download_file_no_pbar(src, dst, chunk_size)
+        download_file_no_pbar(src, dst)
