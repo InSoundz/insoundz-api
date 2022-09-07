@@ -59,35 +59,35 @@ pip install insoundz-cli
 
 ## Getting started
 ```console
-audioapi_cli <command> <arg1> <arg2> ...
+insoundz_cli <command> <arg1> <arg2> ...
 ```
 
 ### Example #1:
 Get versions.
 ```console
-audioapi_cli version
+insoundz_cli version
 ```
 
 ### Example #2:
 Permanently set client ID and secret key.
 ```console
-audioapi_cli config set --client-id XXXX-XXXX-XXXX-XXXX --secret XXXX-XXXX-XXXX-XXXX
+insoundz_cli config set --client-id XXXX-XXXX-XXXX-XXXX --secret XXXX-XXXX-XXXX-XXXX
 ```
 
 ### Example #3:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "<current_path>/example_enhanced.wav").
 ```console
-audioapi_cli enhance-file --api-token="my-key" --src="/home/example_user/my_audio_files/example.wav"
+insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav"
 ```
 
 ### Example #4:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "/home/example_user/my_enhanced_files_dir/new_file.wav").
 ```console
-audioapi_cli enhance-file --api-token="my-key" --src="/home/example_user/my_audio_files/example.wav" --dst="/home/example_user/my_enhanced_files_dir/new_file.wav
+insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --dst="/home/example_user/my_enhanced_files_dir/new_file.wav
 ```
 
 ### Example #5:
 Upload an audio file from our local machine and at the end of the audio enhancement process don't download the enhanced files and request to keep the URL of the enhanced file valid for 8 hours.
 ```console
-audioapi_cli enhance-file --api-token="my-key" --src="/home/example_user/my_audio_files/example.wav" --no-download --retention=480
+insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --no-download --retention=480
 ```
