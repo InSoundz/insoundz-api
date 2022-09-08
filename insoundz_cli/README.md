@@ -1,12 +1,12 @@
-<h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; audioapi-cli Package</h1>
-A simple CLI which is used to give the client an easy and fast access to InSoundz AudioAPI.
+<h1><img align="center" height="90" src="https://drive.google.com/uc?export=view&id=1b1DHDNsl_XGjtU_AK1QR9q_lSo3iLQ4x"> &nbsp; insoundz-cli Package</h1>
+A simple CLI which is used to give the client an easy and fast access to insoundz API.
 <br />
 <br />
 
 ## Installation
 - Please make sure you are running python3.7 or later.
 ```console
-pip install audioapi-cli
+pip install insoundz-cli
 ```
 
 ## Help
@@ -33,16 +33,16 @@ pip install audioapi-cli
 
 | Argument  | Description | Required | Default |
 |-----------|:------------|:---------|:--------|
-| client-id | Client ID for InSoundz AudioAPI services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID only for this session | None | None |
-| secret    | Secret key to access InSoundz AudioAPI services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key only for this session | None | None |
+| client-id | Client ID for insoundz API services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID only for this session | None | None |
+| secret    | Secret key to access insoundz API services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key only for this session | None | None |
 | url       | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url only for this session. If not set and not permanently configured, the CLI will use the default url | None | api.insoundz.io |
 
 ### Command: enhance-file 
 
 | Argument        | Description | Required | Default |
 |-----------------|:------------|:---------|:--------|
-| client-id       | Client ID for InSoundz AudioAPI services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID only for this session | If not set with config command | None |
-| secret          | Secret key to access InSoundz AudioAPI services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key only for this session | If not set with config command | None |
+| client-id       | Client ID for insoundz API services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID only for this session | If not set with config command | None |
+| secret          | Secret key to access insoundz API services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key only for this session | If not set with config command | None |
 | url             | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url only for this session. If not set and not permanently configured, the CLI will use the default url | None | api.insoundz.io |
 | src             | A local path of the original audio file | Yes | None |
 | no-download     | If set, the enhanced file won't be downloaded to the local machine (we'll get only the URL of the enhanced file) | No | False|
@@ -59,35 +59,35 @@ pip install audioapi-cli
 
 ## Getting started
 ```console
-audioapi_cli <command> <arg1> <arg2> ...
+insoundz_cli <command> <arg1> <arg2> ...
 ```
 
 ### Example #1:
 Get versions.
 ```console
-audioapi_cli version
+insoundz_cli version
 ```
 
 ### Example #2:
 Permanently set client ID and secret key.
 ```console
-audioapi_cli config set --client-id XXXX-XXXX-XXXX-XXXX --secret XXXX-XXXX-XXXX-XXXX
+insoundz_cli config set --client-id XXXX-XXXX-XXXX-XXXX --secret XXXX-XXXX-XXXX-XXXX
 ```
 
 ### Example #3:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "<current_path>/example_enhanced.wav").
 ```console
-audioapi_cli enhance-file --api-token="my-key" --src="/home/example_user/my_audio_files/example.wav"
+insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav"
 ```
 
 ### Example #4:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "/home/example_user/my_enhanced_files_dir/new_file.wav").
 ```console
-audioapi_cli enhance-file --api-token="my-key" --src="/home/example_user/my_audio_files/example.wav" --dst="/home/example_user/my_enhanced_files_dir/new_file.wav
+insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --dst="/home/example_user/my_enhanced_files_dir/new_file.wav
 ```
 
 ### Example #5:
 Upload an audio file from our local machine and at the end of the audio enhancement process don't download the enhanced files and request to keep the URL of the enhanced file valid for 8 hours.
 ```console
-audioapi_cli enhance-file --api-token="my-key" --src="/home/example_user/my_audio_files/example.wav" --no-download --retention=480
+insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --no-download --retention=480
 ```

@@ -13,15 +13,15 @@ def version():
     return module.__version__
 
 setup(
-    name='audioapi',
+    name='insoundz_api',
     version=version(),
-    description="InSoundz audioapi client implementation \
+    description="Insoundz API client implementation \
         to produce audio enhancement.",
     readme="README.md",
     license_files=('LICENSE',),
     python_requires=">=3.7",
-    package_dir={"audioapi": "src"},
-    packages=['audioapi'],
+    package_dir={"insoundz_api": "src"},
+    packages=['insoundz_api'],
     install_requires=[
                         'requests',
                         'wget',
