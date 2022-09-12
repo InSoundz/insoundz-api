@@ -3,8 +3,13 @@ A simple CLI which is used to give the client an easy and fast access to insound
 <br />
 <br />
 
+![PyPI](https://img.shields.io/pypi/v/insoundz-cli)
+![PyPI - License](https://img.shields.io/pypi/l/insoundz-cli)
+![PyPI - OS](https://img.shields.io/badge/Operating%20System-OS%20Independent-green)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/insoundz-cli)
+
 ## Installation
-- Please make sure you are running python3.7 or later.
+Please make sure you are running python3.7 or later.
 ```console
 pip install insoundz-cli
 ```
