@@ -3,8 +3,13 @@ Insoundz API client implementation to produce audio enhancement.
 <br />
 <br />
 
+![PyPI](https://img.shields.io/pypi/v/insoundz-api)
+![PyPI - License](https://img.shields.io/pypi/l/insoundz-api)
+![PyPI - OS](https://img.shields.io/badge/Operating%20System-OS%20Independent-green)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/insoundz-api)
+
 ## Installation
-- Please make sure you are running python3.7 or later.
+Please make sure you are running python3.7 or later.
 ```console
 pip install insoundz-api
 ```
