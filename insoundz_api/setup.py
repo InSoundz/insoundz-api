@@ -24,7 +24,6 @@ setup(
     url='https://github.com/InSoundz/insoundz-api/tree/main/insoundz_api',
     install_requires=[
         'requests',
-        'wget',
         'tqdm',
         'halo',
         'validators',

@@ -1,5 +1,4 @@
 import time
-import wget
 import validators
 from pathlib import Path, PurePath
 from halo import Halo
@@ -57,7 +56,7 @@ class AudioEnhancer(object):
         return Path.cwd()
 
     def _get_default_dst_filename(self, src):
-        src_filename = wget.detect_filename(src)
+        src_filename = os.path.basename(src)
         src_filename_no_suffix = PurePath(src_filename).stem
         src_filename_suffix = PurePath(src_filename).suffix
         return src_filename_no_suffix + "_enhanced" + src_filename_suffix
