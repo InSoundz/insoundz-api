@@ -92,7 +92,7 @@ def insoundz_cli(cred_store: click_creds.NetrcStore):
     type=str,
     help="Client ID for insoundz API services. "
          "If not set, the CLI uses the permanently configured client ID. "
-         "If set, the CLI will use this client ID only for this session",
+         "If set, the CLI will use this client ID only for this session.",
     callback=get_client_id,
 )
 @click.option(
@@ -100,7 +100,7 @@ def insoundz_cli(cred_store: click_creds.NetrcStore):
     type=str,
     help="Secret key to access insoundz API services. "
          "If not set, the CLI uses the permanently configured secret key. "
-         "If set, the CLI will use this secret key only for this session",
+         "If set, the CLI will use this secret key only for this session.",
     callback=get_secret,
 )
 @click.option(
@@ -110,7 +110,7 @@ def insoundz_cli(cred_store: click_creds.NetrcStore):
          "If not set, the CLI uses the permanently configured url. "
          "If set, the CLI will use this url only for this session. "
          "If not set and not permanently configured, "
-         "the CLI will use the default url "
+         "the CLI will use the default url. "
          f"[default: {insoundzAPI.get_default_endpoint_url()}]",
     callback=get_url,
 )
@@ -119,7 +119,7 @@ def insoundz_cli(cred_store: click_creds.NetrcStore):
     type=click.Path(
         exists=True, file_okay=True, dir_okay=False,
         readable=True, resolve_path=True),
-    help="A local path of the original audio file",
+    help="A local path of the original audio file.",
     prompt="src",
     required=True,
 )
@@ -127,27 +127,27 @@ def insoundz_cli(cred_store: click_creds.NetrcStore):
     "--no-download",
     is_flag=True,
     help="If set, the enhanced file won't be downloaded to the local machine "
-         "(we'll get only the URL of the enhanced file)",
+         "(we'll get only the URL of the enhanced file).",
 )
 @click.option(
     "--dst",
     type=click.Path(
         exists=False, file_okay=True, dir_okay=True,
         resolve_path=False),
-    help=f"A local path or file to download the enhanced file [default: "
+    help=f"A local path or file to download the enhanced file. [default: "
           "<current_path>/<original_filename>_enhanced.<original_suffix>]",
 )
-@click.option("--retention", type=int, help="URL Retention duration [minutes]")
+@click.option("--retention", type=int, help="URL Retention duration [minutes].")
 @click.option(
     "--status-interval",
     type=float,
-    help="Check the enhancement process every <status-interval> [seconds]",
+    help="Check the enhancement process every <status-interval> [seconds].",
     default=AudioEnhancer.get_default_status_interval(),
 )
 @click.option(
     "--no-progress-bar",
     is_flag=True,
-    help="If set, progress-bar won't be displayed ",
+    help="If set, progress-bar won't be displayed. ",
 )
 def enhance_file(
     client_id, secret, url,
