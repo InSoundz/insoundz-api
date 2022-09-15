@@ -2,7 +2,6 @@ import requests
 from urllib.parse import urlunsplit
 import logging
 
-
 DEFAULT_ENDPOINT_URL = "api.insoundz.io"
 DEFAULT_ENHANCE_VERSION = "v1"
 DEFAULT_TIMEOUT_SEC = 10
