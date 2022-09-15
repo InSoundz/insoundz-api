@@ -203,7 +203,7 @@ def version():
 def balance(client_id, secret, url):
     api = insoundzAPI(client_id, secret, url)
     balance = api.balance()
-    click.echo(f"Your current balance: {balance} [minutes]")
+    click.echo(f"Your current balance: {balance} [credits]")
 
 
 insoundz_cli.add_command(click_creds.config_group)
