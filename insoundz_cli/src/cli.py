@@ -163,16 +163,53 @@ def enhance_file(
 @click.command(
     "version",
     help="Display versions",
-    context_settings={"show_default": True}
 )
 def version():
     click.echo(f"insoundzAPI-CLI    : v{cli_version}")
     click.echo(f"insoundzAPI-Client : v{api_client}")
 
 
+@click.command(
+    "balance",
+    help="Get client balance",
+)
+@click.option(
+    "--client-id",
+    type=str,
+    help="Client ID for insoundz API services. "
+         "If not set, the CLI uses the permanently configured client ID. "
+         "If set, the CLI will use this client ID.",
+    callback=get_client_id,
+)
+@click.option(
+    "--secret",
+    type=str,
+    help="Secret key to access insoundz API services. "
+         "If not set, the CLI uses the permanently configured secret key. "
+         "If set, the CLI will use this secret key.",
+    callback=get_secret,
+)
+@click.option(
+    "--url",
+    type=str,
+    help="Use an alternative endpoint URL (without the 'http://' prefix). "
+         "If not set, the CLI uses the permanently configured url. "
+         "If set, the CLI will use this url. "
+         "If not set and not permanently configured, "
+         "the CLI will use the default url. "
+         f"[default: {insoundzAPI.get_default_endpoint_url()}]",
+    callback=get_url,
+)
+def balance(client_id, secret, url):
+    api = insoundzAPI(client_id, secret, url)
+    balance = api.balance()
+    click.echo(f"Your current balance: {balance} [credits]")
+
+
 insoundz_cli.add_command(click_creds.config_group)
 insoundz_cli.add_command(enhance_file)
 insoundz_cli.add_command(version)
+insoundz_cli.add_command(balance)
 
 
 if __name__ == "__main__":

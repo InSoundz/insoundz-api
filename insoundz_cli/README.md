@@ -48,7 +48,7 @@ pip install insoundz-cli
 |-----------------|:------------|:---------|:--------|
 | --client-id       | Client ID for insoundz API services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID only for this session. | If not set with config command | None |
 | --secret          | Secret key to access insoundz API services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key only for this session. | If not set with config command | None |
-| --url             | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url only for this session. If not set and not permanently configured, the CLI will use the default url. | None | api.insoundz.io |
+| --url             | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url only for this session. If not set and not permanently configured, the CLI will use the default url. | No | api.insoundz.io |
 | --src             | A local path of the original audio file. | Yes | None |
 | --no-download     | If set, the enhanced file won't be downloaded to the local machine (we'll get only the URL of the enhanced file). | No | False|
 | --dst             | A local path or file to download the enhanced file. | No | <current_path>/<original_filename>_enhanced.<original_suffix> |
@@ -61,6 +61,14 @@ pip install insoundz-cli
 | Argument | Description | Required | Default |
 |----------|:------------|:---------|:--------|
 | None     | None        | None     | None    |
+
+### Command: balance 
+
+| Argument | Description | Required | Default |
+|----------|:------------|:---------|:--------|
+| --client-id       | Client ID for insoundz API services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID. | If not set with config command | None |
+| --secret          | Secret key to access insoundz API services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key. | If not set with config command | None |
+| --url             | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url. If not set and not permanently configured, the CLI will use the default url. | No | api.insoundz.io |
 
 ## Getting started
 ```console

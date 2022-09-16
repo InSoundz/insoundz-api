@@ -139,3 +139,22 @@ class insoundzAPI(object):
             resp_info = None
 
         return status, resp_info
+
+    def balance(self, version=DEFAULT_ENHANCE_VERSION):
+        """
+        Based on client_id and secret from the User Management System,
+        retrieve the client current balance.
+        """
+        url = urlunsplit(
+            ('https', self._endpoint_url,
+            f'{version}/account/balance', '', '')
+        )
+
+        response = requests.get(
+            url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC
+        )
+
+        response.raise_for_status()
+        response = response.json()
+        
+        return response["balance"]
