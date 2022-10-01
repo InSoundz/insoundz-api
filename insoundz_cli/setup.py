@@ -29,7 +29,7 @@ setup(
     install_requires=[
         'click_creds',
         'click>=8.1.3',
-        'insoundz_api>=0.1.2'
+        'insoundz_api>=0.1.3'
     ],
     classifiers=[
         'Operating System :: OS Independent',

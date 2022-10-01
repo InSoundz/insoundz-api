@@ -17,6 +17,7 @@ pip install insoundz-cli
 ## Help
 | Command       | Description                   |
 |---------------|:------------------------------|
+| balance       | Get client balance.           |
 | config        | Set or view config variables. |
 | enhance-file  | Enhance audio file.           |
 | version       | Display versions.             |
