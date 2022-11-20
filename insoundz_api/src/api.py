@@ -175,7 +175,4 @@ class insoundzAPI(object):
         response.raise_for_status()
         response = response.json()
 
-        if 'commit_id' in response:
-            return response['branch'], response['commit_id']
-        else:
-            return response['branch']
+        return response['version'], response['build']
