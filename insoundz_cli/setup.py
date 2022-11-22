@@ -1,20 +1,33 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+import subprocess
+import os
+from setuptools import setup
 import importlib
 
 
-def version():
-    loader = importlib.machinery.SourceFileLoader(
-        "src.version", "src/version.py"
-    )
-    module = loader.load_module()
-    return module.__version__
+insoundz_cli_version = (
+    subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
+    .stdout.decode("utf-8")
+    .strip()
+)
+
+if "-" in insoundz_cli_version:
+    # when not on tag, git describe outputs: "1.3.3-22-gdf81228"
+    # pip has gotten strict with version numbers
+    # so change it to: "1.3.3+22.git.gdf81228"
+    # See: https://peps.python.org/pep-0440/#local-version-segments
+    v,i,s = insoundz_cli_version.split("-")
+    insoundz_cli_version = v + "+" + i + ".git." + s
+
+assert "-" not in insoundz_cli_version
+assert "." in insoundz_cli_version
+
+assert os.path.isfile("src/version.py")
+with open("src/VERSION", "w", encoding="utf-8") as fh:
+    fh.write("%s\n" % insoundz_cli_version)
 
 setup(
     name='insoundz_cli',
-    version=version(),
+    version=insoundz_cli_version,
     description="A simple CLI which is used to give the client an easy \
         and fast access to insoundz API.",
     entry_points={
@@ -25,11 +38,12 @@ setup(
     python_requires=">=3.7",
     package_dir={"insoundz_cli": "src"},
     packages=['insoundz_cli'],
+    package_data={"insoundz_cli": ["VERSION"]},
     url='https://github.com/InSoundz/insoundz-api/tree/main/insoundz_cli',
     install_requires=[
         'click_creds',
         'click>=8.1.3',
-        'insoundz_api>=0.1.3'
+        f'insoundz_api=={insoundz_cli_version}'
     ],
     classifiers=[
         'Operating System :: OS Independent',
