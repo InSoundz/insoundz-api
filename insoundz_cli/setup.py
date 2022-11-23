@@ -1,7 +1,7 @@
 import subprocess
 import os
 from setuptools import setup
-from distutils.version import StrictVersion
+from packaging import version
 
 
 insoundz_cli_version = (
@@ -11,7 +11,7 @@ insoundz_cli_version = (
 )
 
 # verify version format
-assert StrictVersion(insoundz_cli_version)
+assert isinstance(version.parse(insoundz_cli_version), version.Version)
 
 assert os.path.isfile("src/version.py")
 with open("src/VERSION", "w", encoding="utf-8") as fh:
