@@ -29,6 +29,7 @@ setup(
     package_data={"insoundz_api": ["VERSION"]},
     url='https://github.com/InSoundz/insoundz-api/tree/main/insoundz_api',
     install_requires=[
+        'packaging',
         'requests',
         'tqdm',
         'halo',
