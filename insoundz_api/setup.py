@@ -1,7 +1,7 @@
 import subprocess
 import os
 from setuptools import setup
-import importlib
+from distutils.version import StrictVersion
 
 
 insoundz_api_version = (
@@ -10,16 +10,8 @@ insoundz_api_version = (
     .strip()
 )
 
-if "-" in insoundz_api_version:
-    # when not on tag, git describe outputs: "1.3.3-22-gdf81228"
-    # pip has gotten strict with version numbers
-    # so change it to: "1.3.3+22.git.gdf81228"
-    # See: https://peps.python.org/pep-0440/#local-version-segments
-    v,i,s = insoundz_api_version.split("-")
-    insoundz_api_version = v + "+" + i + ".git." + s
-
-assert "-" not in insoundz_api_version
-assert "." in insoundz_api_version
+# verify version format
+assert StrictVersion(insoundz_api_version)
 
 assert os.path.isfile("src/version.py")
 with open("src/VERSION", "w", encoding="utf-8") as fh:
