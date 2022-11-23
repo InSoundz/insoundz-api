@@ -4,7 +4,7 @@ import logging
 
 DEFAULT_ENDPOINT_URL = "api.insoundz.io"
 DEFAULT_ENHANCE_VERSION = "v1"
-DEFAULT_TIMEOUT_SEC = 10
+DEFAULT_TIMEOUT_SEC = 30
 
 
 class insoundzAPI(object):
@@ -158,3 +158,21 @@ class insoundzAPI(object):
         response = response.json()
         
         return response["balance"]
+
+    def version(self, version=DEFAULT_ENHANCE_VERSION):
+        """
+        Retrieve insoundz API server version.
+        """
+        url = urlunsplit(
+            ('https', self._endpoint_url,
+            f'{version}/version', '', '')
+        )
+
+        response = requests.get(
+            url, headers=self._headers, timeout=DEFAULT_TIMEOUT_SEC
+        )
+
+        response.raise_for_status()
+        response = response.json()
+
+        return response['version'], response['build']
