@@ -1,32 +1,26 @@
-import subprocess
-import os
-from setuptools import setup
-from packaging import version
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+import importlib
 
 
-insoundz_api_version = (
-    subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
-    .stdout.decode("utf-8")
-    .strip()
-)
-
-# verify version format
-assert isinstance(version.parse(insoundz_api_version), version.Version)
-
-assert os.path.isfile("src/version.py")
-with open("src/VERSION", "w", encoding="utf-8") as fh:
-    fh.write("%s\n" % insoundz_api_version)
+def version():
+    loader = importlib.machinery.SourceFileLoader(
+        "src.version", "src/version.py"
+    )
+    module = loader.load_module()
+    return module.__version__
 
 setup(
     name='insoundz_api',
-    version=insoundz_api_version,
+    version=version(),
     description="Insoundz API client implementation \
         to produce audio enhancement.",
     license='MIT',
     python_requires=">=3.7",
     package_dir={"insoundz_api": "src"},
     packages=['insoundz_api'],
-    package_data={"insoundz_api": ["VERSION"]},
     url='https://github.com/InSoundz/insoundz-api/tree/main/insoundz_api',
     install_requires=[
         'requests',
