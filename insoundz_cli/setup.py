@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 class PostInstallCommand(install):
-    def auto_completion_conf():
+    def auto_completion_conf(self):
         """
         Auto-completion support for the following terminals:
             - Bash
@@ -15,12 +15,14 @@ class PostInstallCommand(install):
             - Fish
         """
         home = str(Path.home())
-    
+
         bashrc_path = os.path.join(home, ".bashrc")
         if os.path.exists(bashrc_path):
             bash_complete = 'eval "$(_INSOUNDZ_CLI_COMPLETE=bash_source insoundz_cli)"'
-            with open(bashrc_path, 'a') as file_obj:
-                file_obj.write(f'\n{bash_complete}')
+            with open(bashrc_path, 'r') as fd_read:
+                if bash_complete not in fd_read:
+                    with open(bashrc_path, 'a') as fd_write:
+                        fd_write.write(f'\n{bash_complete}')
 
         zshrc_path = os.path.join(home, ".zshrc")
         if os.path.exists(zshrc_path):
@@ -49,6 +51,8 @@ insoundz_cli_version = (
     .strip()
 )
 
+insoundz_cli_version = '0.1.4.1'
+
 # verify version format
 assert isinstance(version.parse(insoundz_cli_version), version.Version)
 
@@ -74,7 +78,7 @@ setup(
     install_requires=[
         'click_creds',
         'click>=8.1.3',
-        f'insoundz_api=={insoundz_cli_version}'
+        f'insoundz_api=={"0.1.3"}'
     ],
     classifiers=[
         'Operating System :: OS Independent',
