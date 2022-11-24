@@ -42,6 +42,7 @@ jobs:
         password: ${{ secrets.PYPI_TEST_API_TOKEN_INSOUNDZ_API }}
         packages_dir: insoundz_api/dist/
         skip_existing: false
+        repository_url: https://test.pypi.org/legacy/
     - name: Build insoundz-cli package
       run: |
         pushd insoundz_cli
@@ -54,3 +55,4 @@ jobs:
         password: ${{ secrets.PYPI_TEST_API_TOKEN_INSOUNDZ_CLI }}
         packages_dir: insoundz_cli/dist/
         skip_existing: false
+        repository_url: https://test.pypi.org/legacy/
