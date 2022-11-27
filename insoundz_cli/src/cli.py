@@ -166,7 +166,7 @@ def enhance_file(
 def version():
     with open(os.path.dirname(__file__) + "/VERSION", "r", encoding="utf-8") as fd:
         cli_version = fd.read().strip()
-        click.echo(f"insoundzAPI-CLI    : v{cli_version}")
+        click.echo(f"insoundzAPI-CLI: v{cli_version}")
 
 
 @click.command(
