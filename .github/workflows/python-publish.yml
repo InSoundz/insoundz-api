@@ -33,7 +33,7 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_API }}
       run: |
         pushd insoundz_api
-        python setup.py sdist
+        python setup.py sdist bdist_wheel
         twine upload dist/*
         popd
     - name: Build and publish insoundz-cli package
@@ -42,6 +42,6 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_CLI }}
       run: |
         pushd insoundz_cli
-        python setup.py sdist
+        python setup.py sdist bdist_wheel
         twine upload dist/*
         popd
