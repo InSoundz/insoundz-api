@@ -2,12 +2,12 @@
 /insoundz_api/dist/
 /insoundz_api/insoundz_api.egg-info/
 /insoundz_api/src/__pycache__/
-/insoundz_api/src/VERSION
+#/insoundz_api/src/VERSION
 /insoundz_cli/build/
 /insoundz_cli/dist/
 /insoundz_cli/insoundz_api.egg-info/
 /insoundz_cli/src/__pycache__/
-/insoundz_cli/src/VERSION
+#/insoundz_cli/src/VERSION
 /venv
 /.venv
 __pycache__/
