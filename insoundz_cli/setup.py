@@ -31,7 +31,7 @@ setup(
     package_dir={"insoundz_cli": "src"},
     packages=['insoundz_cli'],
     package_data={"insoundz_cli": ["VERSION"]},
-    url='https://github.com/InSoundz/insoundz-api/tree/main/insoundz_cli',
+    url='https://github.com/InSoundz/insoundz-api',
     install_requires=[
         'click_creds',
         'click>=8.1.3',
