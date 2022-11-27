@@ -12,45 +12,36 @@ on:
   release:
     types: [published]
 
-permissions:
-  contents: read
-
 jobs:
   deploy:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v2
       with:
         python-version: '3.x'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install setuptools wheel twine packaging
-    - name: Build insoundz-api package
+    - name: Build and publish insoundz-api package
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_API }}
       run: |
         pushd insoundz_api
         python setup.py sdist
+        twine upload dist/*
         popd
-    - name: Publish insoundz-api package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_API }}
-        packages_dir: insoundz_api/dist/
-        skip_existing: false
-    - name: Build insoundz-cli package
+    - name: Build and publish insoundz-cli package
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_CLI }}
       run: |
         pushd insoundz_cli
         python setup.py sdist
+        twine upload dist/*
         popd
-    - name: Publish insoundz-cli package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_CLI }}
-        packages_dir: insoundz_cli/dist/
-        skip_existing: false
