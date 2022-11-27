@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import click
 import click_creds
 from insoundz_api.api import insoundzAPI
@@ -163,12 +164,9 @@ def enhance_file(
     help="Display versions",
 )
 def version():
-    with open("insoundz_cli.VERSION", "r", encoding="utf-8") as fv_cli, \
-        open("insoundz_api.VERSION", "r", encoding="utf-8") as fv_api_client:
-        cli_version = fv_cli.read()
-        api_client_version = fv_api_client.read()
+    with open(os.path.dirname(__file__) + "/VERSION", "r", encoding="utf-8") as fd:
+        cli_version = fd.read().strip()
         click.echo(f"insoundzAPI-CLI    : v{cli_version}")
-        click.echo(f"insoundzAPI-Client : v{api_client_version}")
 
 
 @click.command(
