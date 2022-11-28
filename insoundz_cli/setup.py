@@ -51,8 +51,6 @@ insoundz_cli_version = (
     .strip()
 )
 
-insoundz_cli_version = '0.1.4.1'
-
 # verify version format
 assert isinstance(version.parse(insoundz_cli_version), version.Version)
 
@@ -78,7 +76,7 @@ setup(
     install_requires=[
         'click_creds',
         'click>=8.1.3',
-        f'insoundz_api=={"0.1.3"}'
+        f'insoundz_api=={insoundz_cli_version}'
     ],
     classifiers=[
         'Operating System :: OS Independent',

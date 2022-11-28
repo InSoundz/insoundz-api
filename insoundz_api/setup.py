@@ -10,8 +10,6 @@ insoundz_api_version = (
     .strip()
 )
 
-insoundz_api_version = '0.1.4.1'
-
 # verify version format
 assert isinstance(version.parse(insoundz_api_version), version.Version)
 
