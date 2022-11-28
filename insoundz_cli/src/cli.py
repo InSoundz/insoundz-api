@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
+import os
 import click
 import click_creds
 from insoundz_api.api import insoundzAPI
 from insoundz_api.enhancer import AudioEnhancer
-from insoundz_cli.version import __version__ as cli_version
-from insoundz_api.version import __version__ as api_client
 
 
 def get_credentials(cred_store):
@@ -165,8 +164,9 @@ def enhance_file(
     help="Display versions",
 )
 def version():
-    click.echo(f"insoundzAPI-CLI    : v{cli_version}")
-    click.echo(f"insoundzAPI-Client : v{api_client}")
+    with open(os.path.dirname(__file__) + "/VERSION", "r", encoding="utf-8") as fd:
+        cli_version = fd.read().strip()
+        click.echo(f"insoundzAPI-CLI: v{cli_version}")
 
 
 @click.command(
