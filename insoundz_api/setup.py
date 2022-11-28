@@ -27,7 +27,7 @@ setup(
     package_dir={"insoundz_api": "src"},
     packages=['insoundz_api'],
     package_data={"insoundz_api": ["VERSION"]},
-    url='https://github.com/InSoundz/insoundz-api/tree/main/insoundz_api',
+    url='https://github.com/InSoundz/insoundz-api',
     install_requires=[
         'requests',
         'tqdm',
