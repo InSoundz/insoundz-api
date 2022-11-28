@@ -4,7 +4,18 @@ from setuptools import setup
 from setuptools.command.install import install
 from packaging import version
 from pathlib import Path
+import atexit
 
+
+def _post_install():
+    print('####################### POST INSTALL ######################')
+
+
+class new_install(install):
+    def __init__(self, *args, **kwargs):
+        super(new_install, self).__init__(*args, **kwargs)
+        atexit.register(_post_install)
+        
 
 class PostInstallCommand(install):
     def auto_completion_conf(self):
@@ -90,7 +101,8 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
     ],
-    cmdclass={
-        'install': PostInstallCommand,
-    },
+    #cmdclass={
+    #    'install': PostInstallCommand,
+    #},
+    cmdclass={'install': new_install},
  )
