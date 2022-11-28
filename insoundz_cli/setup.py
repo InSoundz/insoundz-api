@@ -41,8 +41,10 @@ class PostInstallCommand(install):
         """
         Post-installation for installation mode.
         """
-        install.run(self)
+        print("[setup.py][run][001]")
         self.auto_completion_conf()
+        install.run(self)
+        print("[setup.py][run][002]")
         
 
 insoundz_cli_version = (
