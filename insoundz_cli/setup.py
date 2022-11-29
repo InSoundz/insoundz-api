@@ -4,7 +4,7 @@ from setuptools import setup
 from setuptools.command.install import install
 from packaging import version
 from pathlib import Path
-
+        
 
 class PostInstallCommand(install):
     def auto_completion_conf(self):
