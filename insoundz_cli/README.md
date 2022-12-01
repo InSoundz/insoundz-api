@@ -9,7 +9,7 @@ A simple CLI which is used to give the client an easy and fast access to insound
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/insoundz-cli)
 
 ## Installation
-To enable the auto-complete support, you will have to install pip from source and not from wheel.
+To enable the auto-complete support, you will have to pip install from source and not from wheel.
 ```console
 pip install --no-binary insoundz-cli insoundz-cli
 ```
