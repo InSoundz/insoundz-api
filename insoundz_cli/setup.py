@@ -41,10 +41,8 @@ class PostInstallCommand(install):
         """
         Post-installation for installation mode.
         """
-        print("[setup.py][run][001]")
         install.run(self)
         self.auto_completion_conf()
-        print("[setup.py][run][002]")
         
 
 assert os.path.isfile("src/version.py")
