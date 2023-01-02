@@ -137,7 +137,7 @@ class AudioEnhancer(object):
         else:
             self._logger.exception(f"[{sid}] Unexpected status {status}")
 
-    def _enhancement_start(self, api, src, dst, retention, pbar):
+    def _enhancement_start(self, api, src, dst, retention, preset, pbar):
         self._logger.info(f"Sending a request to insoundzAPI to enhance {src}")
 
         if validators.url(src):
@@ -146,7 +146,7 @@ class AudioEnhancer(object):
         if dst and validators.url(dst):
             raise Exception(f"Invalid destination path {dst}")
 
-        sid, src_url = api.enhance_file(retention)
+        sid, src_url = api.enhance_file(retention, preset)
 
         self._logger.info(
             f"[{sid}] Uploading {src} to insoundzAPI for processing."
@@ -157,7 +157,7 @@ class AudioEnhancer(object):
 
     def enhance_file(
         self, src, no_download=False, dst=None, retention=None,
-        status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
+        preset=None, status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
         progress_bar=False
     ):
         """
@@ -194,6 +194,10 @@ class AudioEnhancer(object):
                                     therefore it's not recommanded to set the
                                     <no_download> flag.
                                     (This param is optional)
+        :param str  preset:         The client can choose between 2 postprocessing
+                                    presets; The 'raw' preset excludes all postprocessing 
+                                    modules. The 'podcast' preset adds some postprocessing
+                                    modules that suits podcast audio.
         :param int  status_interval_sec:
                                     The client can set the frequency of
                                     querying the status of the audio
@@ -213,7 +217,7 @@ class AudioEnhancer(object):
         try:
             sid = None
             sid = self._enhancement_start(
-                self._api, src, dst, retention, progress_bar
+                self._api, src, dst, retention, preset, progress_bar
             )
             status, resp_info = self._wait_till_done(
                 sid, status_interval_sec, progress_bar, spinner
