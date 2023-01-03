@@ -23,7 +23,7 @@ except:
         with open("src/VERSION", "r", encoding="utf-8") as fd:
             insoundz_api_version = fd.read().strip()
     except:
-        insoundz_api_version = "0.0.1a0"
+        insoundz_api_version = "0.0.1a"
 
 setup(
     name='insoundz_api',
