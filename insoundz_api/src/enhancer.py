@@ -206,16 +206,22 @@ class AudioEnhancer(object):
         :param int  progress_bar:   The client can enable/disable the display
                                     of the audio enhancement progress bar.
                                     (This param is optional)
-        :return:                    None
-        :rtype:                     None
+        :return:    sid:            The session ID.
+                    status:         Enhancment final status ("done" or "failure")
+                    resp_info:      Final status additinal info (Enhanced file url
+                                    if status "done. Error message if status "failure".)
+        :rtype:                     Tuple
         """
 
         spinner = None
         if progress_bar:
             spinner = Halo(spinner='dots', color='magenta', placement='right')
 
+        sid = None
+        status = None
+        resp_info = None
+
         try:
-            sid = None
             sid = self._enhancement_start(
                 self._api, src, dst, retention, preset, progress_bar
             )
@@ -232,6 +238,8 @@ class AudioEnhancer(object):
 
         except Exception as e:
             self._logger.error(f"[{sid}] {e}")
+
+        return sid, status, resp_info
 
     @staticmethod
     def get_default_status_interval():
