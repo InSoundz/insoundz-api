@@ -34,7 +34,7 @@ setup(
     python_requires=">=3.7",
     package_dir={"insoundz_api": "src"},
     packages=['insoundz_api'],
-    #package_data={"insoundz_api": ["VERSION"]},
+    package_data={"insoundz_api": ["VERSION"]},
     url='https://github.com/InSoundz/insoundz-api',
     install_requires=[
         'requests',
