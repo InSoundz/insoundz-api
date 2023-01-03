@@ -4,6 +4,9 @@ from setuptools import setup
 from packaging import version
 
 
+DEVELOP_VERSION = "0.0.1a"
+
+
 assert os.path.isfile("src/version.py")
 
 try:
@@ -23,7 +26,7 @@ except:
         with open("src/VERSION", "r", encoding="utf-8") as fd:
             insoundz_api_version = fd.read().strip()
     except:
-        insoundz_api_version = "0.0.1a"
+        insoundz_api_version = DEVELOP_VERSION
 
 setup(
     name='insoundz_api',
