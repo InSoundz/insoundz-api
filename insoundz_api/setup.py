@@ -10,6 +10,9 @@ insoundz_api_version = (
     .strip()
 )
 
+print(insoundz_api_version)
+print(version.Version)
+
 # verify version format
 assert isinstance(version.parse(insoundz_api_version), version.Version)
 
