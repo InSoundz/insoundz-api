@@ -4,18 +4,29 @@ from setuptools import setup
 from packaging import version
 
 
-insoundz_cli_version = (
-    subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
-    .stdout.decode("utf-8")
-    .strip()
-)
+DEVELOP_VERSION = "0.0.1a"
 
-# verify version format
-assert isinstance(version.parse(insoundz_cli_version), version.Version)
 
 assert os.path.isfile("src/version.py")
-with open("src/VERSION", "w", encoding="utf-8") as fh:
-    fh.write("%s\n" % insoundz_cli_version)
+
+try:
+    insoundz_cli_version = (
+        subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
+        .stdout.decode("utf-8")
+        .strip()
+    )
+
+    # verify version format
+    assert isinstance(version.parse(insoundz_cli_version), version.Version)
+
+    with open("src/VERSION", "w", encoding="utf-8") as fh:
+        fh.write("%s\n" % insoundz_cli_version)
+except:
+    try:
+        with open("src/VERSION", "r", encoding="utf-8") as fd:
+            insoundz_cli_version = fd.read().strip()
+    except:
+        insoundz_cli_version = DEVELOP_VERSION
 
 setup(
     name='insoundz_cli',
