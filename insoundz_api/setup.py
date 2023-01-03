@@ -19,8 +19,11 @@ try:
     with open("src/VERSION", "w", encoding="utf-8") as fh:
         fh.write("%s\n" % insoundz_api_version)
 except:
-    with open("src/VERSION", "r", encoding="utf-8") as fd:
-        insoundz_api_version = fd.read().strip()
+    try:
+        with open("src/VERSION", "r", encoding="utf-8") as fd:
+            insoundz_api_version = fd.read().strip()
+    except:
+        insoundz_api_version = "0.0.1a0"
 
 setup(
     name='insoundz_api',
