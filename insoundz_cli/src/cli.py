@@ -163,10 +163,42 @@ def enhance_file(
     "version",
     help="Display versions",
 )
-def version():
+@click.option(
+    "--client-id",
+    type=str,
+    help="Client ID for insoundz API services. "
+         "If not set, the CLI uses the permanently configured client ID. "
+         "If set, the CLI will use this client ID.",
+    callback=get_client_id,
+)
+@click.option(
+    "--secret",
+    type=str,
+    help="Secret key to access insoundz API services. "
+         "If not set, the CLI uses the permanently configured secret key. "
+         "If set, the CLI will use this secret key.",
+    callback=get_secret,
+)
+@click.option(
+    "--url",
+    type=str,
+    help="Use an alternative endpoint URL (without the 'http://' prefix). "
+         "If not set, the CLI uses the permanently configured url. "
+         "If set, the CLI will use this url. "
+         "If not set and not permanently configured, "
+         "the CLI will use the default url. "
+         f"[default: {insoundzAPI.get_default_endpoint_url()}]",
+    callback=get_url,
+)
+def version(client_id, secret, url):
     with open(os.path.dirname(__file__) + "/VERSION", "r", encoding="utf-8") as fd:
         cli_version = fd.read().strip()
         click.echo(f"insoundzAPI-CLI: v{cli_version}")
+
+    api = insoundzAPI(client_id, secret, url)
+    version, build = api.version()
+    api_version = version.split('/')[-1]
+    click.echo(f"insoundzAPI: {api_version}")
 
 
 @click.command(

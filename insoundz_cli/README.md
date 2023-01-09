@@ -61,7 +61,10 @@ pip install insoundz-cli
 
 | Argument | Description | Required | Default |
 |----------|:------------|:---------|:--------|
-| None     | None        | None     | None    |
+|----------|:------------|:---------|:--------|
+| --client-id       | Client ID for insoundz API services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID. | If not set with config command | None |
+| --secret          | Secret key to access insoundz API services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key. | If not set with config command | None |
+| --url             | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url. If not set and not permanently configured, the CLI will use the default url. | No | api.insoundz.io |
 
 ### Command: balance 
 
@@ -97,7 +100,7 @@ insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav"
 ### Example #4:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "/home/example_user/my_enhanced_files_dir/new_file.wav").
 ```console
-insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --dst="/home/example_user/my_enhanced_files_dir/new_file.wav
+insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --dst="/home/example_user/my_enhanced_files_dir/new_file.wav"
 ```
 
 ### Example #5:
