@@ -4,6 +4,9 @@ from setuptools import setup
 from packaging import version
 
 
+print("### SETUP.PY ###")
+#print("GITHUB_ACTIONS")
+
 assert os.path.isfile("src/version.py")
 
 try:

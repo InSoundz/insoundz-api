@@ -35,22 +35,22 @@ jobs:
         pushd insoundz_api
         python setup.py sdist bdist_wheel
         popd
-    - name: Publish insoundz-api package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_API }}
-        packages_dir: insoundz_api/dist/
-        skip_existing: false
-    - name: Build insoundz-cli package
-      run: |
-        pushd insoundz_cli
-        python setup.py sdist bdist_wheel
-        popd
-    - name: Publish insoundz-cli package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_CLI }}
-        packages_dir: insoundz_cli/dist/
-        skip_existing: false
+#    - name: Publish insoundz-api package
+#      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+#      with:
+#        user: __token__
+#        password: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_API }}
+#        packages_dir: insoundz_api/dist/
+#        skip_existing: false
+#    - name: Build insoundz-cli package
+#      run: |
+#        pushd insoundz_cli
+#        python setup.py sdist bdist_wheel
+#        popd
+#    - name: Publish insoundz-cli package
+#      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+#      with:
+#        user: __token__
+#        password: ${{ secrets.PYPI_API_TOKEN_INSOUNDZ_CLI }}
+#        packages_dir: insoundz_cli/dist/
+#        skip_existing: false
