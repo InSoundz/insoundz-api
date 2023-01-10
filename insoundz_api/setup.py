@@ -4,12 +4,9 @@ from setuptools import setup
 from packaging import version
 
 
-print("### SETUP.PY ###")
-print(f"GITHUB_ACTIONS value is [{os.environ.get('GITHUB_ACTIONS')}]")
-
 assert os.path.isfile("src/version.py")
 
-try:
+if os.environ.get('GITHUB_ACTIONS') == "true":
     insoundz_api_version = (
         subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
         .stdout.decode("utf-8")
@@ -21,9 +18,11 @@ try:
 
     with open("src/VERSION", "w", encoding="utf-8") as fh:
         fh.write("%s\n" % insoundz_api_version)
-except:
+else:
     with open("src/VERSION", "r", encoding="utf-8") as fd:
         insoundz_api_version = fd.read().strip()
+
+print(f"### SETUP.PY {insoundz_api_version} ###")
 
 setup(
     name='insoundz_api',
