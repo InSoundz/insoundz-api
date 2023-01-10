@@ -22,8 +22,6 @@ else:
     with open("src/VERSION", "r", encoding="utf-8") as fd:
         insoundz_api_version = fd.read().strip()
 
-print(f"### SETUP.PY {insoundz_api_version} ###")
-
 setup(
     name='insoundz_api',
     version=insoundz_api_version,
