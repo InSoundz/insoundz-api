@@ -5,7 +5,7 @@ from packaging import version
 
 
 print("### SETUP.PY ###")
-#print("GITHUB_ACTIONS")
+print(f"GITHUB_ACTIONS value is [{os.environ.get('GITHUB_ACTIONS')}]")
 
 assert os.path.isfile("src/version.py")
 
