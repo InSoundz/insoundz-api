@@ -1,21 +1,68 @@
 import subprocess
 import os
 from setuptools import setup
+from setuptools.command.install import install
 from packaging import version
+from pathlib import Path
+        
 
+class PostInstallCommand(install):
+    def update_shell_conf(self, conf_path, cmd):
+        with open(conf_path, 'r') as fd_read:
+            if cmd not in fd_read:
+                with open(conf_path, 'a') as fd_write:
+                    fd_write.write(f'\n{cmd}')
 
-insoundz_cli_version = (
-    subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
-    .stdout.decode("utf-8")
-    .strip()
-)
+    def set_auto_completion(self):
+        """
+        Auto-completion support for the following terminals:
+            - Bash
+            - Zsh
+            - Fish
+        """
+        home = str(Path.home())
 
-# verify version format
-assert isinstance(version.parse(insoundz_cli_version), version.Version)
+        bashrc_path = os.path.join(home, ".bashrc")
+        if os.path.exists(bashrc_path):
+            bash_complete_cmd = 'eval "$(_INSOUNDZ_CLI_COMPLETE=bash_source insoundz_cli)"'
+            self.update_shell_conf(bashrc_path, bash_complete_cmd)
+
+        zshrc_path = os.path.join(home, ".zshrc")
+        if os.path.exists(zshrc_path):
+            zsh_complete_cmd = 'eval "$(_INSOUNDZ_CLI_COMPLETE=zsh_source insoundz_cli)"'
+            self.update_shell_conf(zshrc_path, zsh_complete_cmd)
+
+        fish_conf_dir = os.path.join(home, ".config/fish/completions")
+        if os.path.exists(fish_conf_dir):
+            fish_conf_path = os.path.join(fish_conf_dir, "insoundz_cli.fish")
+            fish_complete_cmd = 'eval (env _INSOUNDZ_CLI_COMPLETE=fish_source insoundz_cli)'
+            self.update_shell_conf(fish_conf_path, fish_complete_cmd)
+
+    def run(self):
+        """
+        Post-installation for installation mode.
+        """
+        install.run(self)
+        self.set_auto_completion()
+
 
 assert os.path.isfile("src/version.py")
-with open("src/VERSION", "w", encoding="utf-8") as fh:
-    fh.write("%s\n" % insoundz_cli_version)
+
+if os.environ.get('GITHUB_ACTIONS') == "true":
+    insoundz_cli_version = (
+        subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
+        .stdout.decode("utf-8")
+        .strip()
+    )
+
+    # verify version format
+    assert isinstance(version.parse(insoundz_cli_version), version.Version)
+
+    with open("src/VERSION", "w", encoding="utf-8") as fh:
+        fh.write("%s\n" % insoundz_cli_version)
+else:
+    with open("src/VERSION", "r", encoding="utf-8") as fd:
+        insoundz_cli_version = fd.read().strip()
 
 setup(
     name='insoundz_cli',
@@ -47,4 +94,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
     ],
+    cmdclass={
+        'install': PostInstallCommand,
+    },
  )
