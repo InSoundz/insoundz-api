@@ -194,10 +194,11 @@ class AudioEnhancer(object):
                                     therefore it's not recommanded to set the
                                     <no_download> flag.
                                     (This param is optional)
-        :param str  preset:         The client can choose between 2 postprocessing
-                                    presets; The 'raw' preset excludes all postprocessing 
-                                    modules. The 'podcast' preset adds some postprocessing
-                                    modules that suits podcast audio.
+        :param str  preset:         The client can choose between 2 audio presets; 
+                                    The 'flat' preset includes Denoising, Dereverbration, 
+                                    Click sounds filtering and Deplosive. The 'post' preset 
+                                    includes everything from 'flat' and Auto-Mixing, 
+                                    Dynamic-EQ, Multi speaker leveling, Loudness correction..
         :param int  status_interval_sec:
                                     The client can set the frequency of
                                     querying the status of the audio
