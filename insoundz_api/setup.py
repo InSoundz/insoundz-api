@@ -9,7 +9,7 @@ DEVELOP_VERSION = "0.0.1a"
 
 assert os.path.isfile("src/version.py")
 
-try:
+if os.environ.get('GITHUB_ACTIONS') == "true":
     insoundz_api_version = (
         subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
         .stdout.decode("utf-8")
@@ -21,7 +21,7 @@ try:
 
     with open("src/VERSION", "w", encoding="utf-8") as fh:
         fh.write("%s\n" % insoundz_api_version)
-except:
+else:
     try:
         with open("src/VERSION", "r", encoding="utf-8") as fd:
             insoundz_api_version = fd.read().strip()
