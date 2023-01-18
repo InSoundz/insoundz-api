@@ -155,7 +155,8 @@ def enhance_file(
 ):
     enhancer = AudioEnhancer(client_id, secret, url)
     enhancer.enhance_file(
-        src, no_download, dst, retention, status_interval, not no_progress_bar
+        src=src, no_download=no_download, dst=dst, retention=retention,
+        status_interval_sec=status_interval, progress_bar=(not no_progress_bar)
     )
 
 

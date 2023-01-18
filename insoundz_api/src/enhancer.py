@@ -1,11 +1,14 @@
 import time
 import validators
+import requests
+from http import HTTPStatus
 from pathlib import Path, PurePath
 from halo import Halo
 from insoundz_api.helpers import *
 from insoundz_api.api import insoundzAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
+MAX_UNAUTHORIZED_RETRIES = 10
 
 
 class AudioEnhancer(object):
@@ -92,11 +95,13 @@ class AudioEnhancer(object):
         if not no_download:
             self._download_enhanced_file(sid, url, src, dst, pbar)
 
-    def _wait_till_done(self, sid, status_interval_sec, pbar, spinner):
-        try:
-            prev_status = None
-            status = None
-            while not time.sleep(status_interval_sec):
+    def _wait_till_done(self, sid, status_interval_sec, pbar, spinner):    
+        prev_status = None
+        status = None
+        retries = MAX_UNAUTHORIZED_RETRIES
+
+        while not time.sleep(status_interval_sec):
+            try:
                 status, resp_info = self._api.enhance_status(sid)
 
                 if status != prev_status:
@@ -114,9 +119,19 @@ class AudioEnhancer(object):
                     )
                 prev_status = status
 
-        except Exception as e:
-            self._handle_enhance_failure(sid, e, status, pbar, spinner)
-            raise
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == HTTPStatus.UNAUTHORIZED and retries:
+                    retries -= 1
+                else:
+                    self._handle_enhance_failure(sid, e, status, pbar, spinner)
+                    raise
+
+            except Exception as e:
+                self._handle_enhance_failure(sid, e, status, pbar, spinner)
+                raise
+
+            else:
+                retries = MAX_UNAUTHORIZED_RETRIES
 
     def _enhancement_finish(
         self, sid, status, info, src, no_download, dst, pbar, spinner
