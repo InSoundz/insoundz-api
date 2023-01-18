@@ -79,6 +79,10 @@ class insoundzAPI(object):
                                 for <retention> minutes.
                                 (This param is optional)
 
+        :param str preset:      The desired postprocessing preset for the 
+                                file in question. The avalible presets are
+                                'flat' and 'post'.
+
         :return:                A <session_id> and an <upload_url>.
         :rtype:                 Tuple
         """
