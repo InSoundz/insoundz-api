@@ -6,6 +6,9 @@ from packaging import version
 from pathlib import Path
         
 
+DEVELOP_VERSION = "0.0.1a"
+
+
 class PostInstallCommand(install):
     def update_shell_conf(self, conf_path, cmd):
         with open(conf_path, 'r') as fd_read:
@@ -61,8 +64,11 @@ if os.environ.get('GITHUB_ACTIONS') == "true":
     with open("src/VERSION", "w", encoding="utf-8") as fh:
         fh.write("%s\n" % insoundz_cli_version)
 else:
-    with open("src/VERSION", "r", encoding="utf-8") as fd:
-        insoundz_cli_version = fd.read().strip()
+    try:
+        with open("src/VERSION", "r", encoding="utf-8") as fd:
+            insoundz_cli_version = fd.read().strip()
+    except:
+        insoundz_cli_version = DEVELOP_VERSION
 
 setup(
     name='insoundz_cli',
