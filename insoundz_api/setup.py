@@ -4,6 +4,9 @@ from setuptools import setup
 from packaging import version
 
 
+DEVELOP_VERSION = "0.0.1a"
+
+
 assert os.path.isfile("src/version.py")
 
 if os.environ.get('GITHUB_ACTIONS') == "true":
@@ -19,8 +22,11 @@ if os.environ.get('GITHUB_ACTIONS') == "true":
     with open("src/VERSION", "w", encoding="utf-8") as fh:
         fh.write("%s\n" % insoundz_api_version)
 else:
-    with open("src/VERSION", "r", encoding="utf-8") as fd:
-        insoundz_api_version = fd.read().strip()
+    try:
+        with open("src/VERSION", "r", encoding="utf-8") as fd:
+            insoundz_api_version = fd.read().strip()
+    except:
+        insoundz_api_version = DEVELOP_VERSION
 
 setup(
     name='insoundz_api',

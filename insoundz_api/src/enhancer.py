@@ -1,11 +1,14 @@
 import time
 import validators
+import requests
+from http import HTTPStatus
 from pathlib import Path, PurePath
 from halo import Halo
 from insoundz_api.helpers import *
 from insoundz_api.api import insoundzAPI
 
 DEFAULT_STATUS_INTERVAL_SEC = 0.5
+MAX_UNAUTHORIZED_RETRIES = 10
 
 
 class AudioEnhancer(object):
@@ -92,11 +95,13 @@ class AudioEnhancer(object):
         if not no_download:
             self._download_enhanced_file(sid, url, src, dst, pbar)
 
-    def _wait_till_done(self, sid, status_interval_sec, pbar, spinner):
-        try:
-            prev_status = None
-            status = None
-            while not time.sleep(status_interval_sec):
+    def _wait_till_done(self, sid, status_interval_sec, pbar, spinner):    
+        prev_status = None
+        status = None
+        retries = MAX_UNAUTHORIZED_RETRIES
+
+        while not time.sleep(status_interval_sec):
+            try:
                 status, resp_info = self._api.enhance_status(sid)
 
                 if status != prev_status:
@@ -114,9 +119,19 @@ class AudioEnhancer(object):
                     )
                 prev_status = status
 
-        except Exception as e:
-            self._handle_enhance_failure(sid, e, status, pbar, spinner)
-            raise
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == HTTPStatus.UNAUTHORIZED and retries:
+                    retries -= 1
+                else:
+                    self._handle_enhance_failure(sid, e, status, pbar, spinner)
+                    raise
+
+            except Exception as e:
+                self._handle_enhance_failure(sid, e, status, pbar, spinner)
+                raise
+
+            else:
+                retries = MAX_UNAUTHORIZED_RETRIES
 
     def _enhancement_finish(
         self, sid, status, info, src, no_download, dst, pbar, spinner
@@ -137,7 +152,7 @@ class AudioEnhancer(object):
         else:
             self._logger.exception(f"[{sid}] Unexpected status {status}")
 
-    def _enhancement_start(self, api, src, dst, retention, pbar):
+    def _enhancement_start(self, api, src, dst, retention, preset, pbar):
         self._logger.info(f"Sending a request to insoundzAPI to enhance {src}")
 
         if validators.url(src):
@@ -146,7 +161,7 @@ class AudioEnhancer(object):
         if dst and validators.url(dst):
             raise Exception(f"Invalid destination path {dst}")
 
-        sid, src_url = api.enhance_file(retention)
+        sid, src_url = api.enhance_file(retention, preset)
 
         self._logger.info(
             f"[{sid}] Uploading {src} to insoundzAPI for processing."
@@ -157,7 +172,7 @@ class AudioEnhancer(object):
 
     def enhance_file(
         self, src, no_download=False, dst=None, retention=None,
-        status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
+        preset=None, status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
         progress_bar=False
     ):
         """
@@ -194,6 +209,11 @@ class AudioEnhancer(object):
                                     therefore it's not recommanded to set the
                                     <no_download> flag.
                                     (This param is optional)
+        :param str  preset:         The client can choose between 2 audio presets; 
+                                    The 'flat' preset includes Denoising, Dereverbration, 
+                                    Click sounds filtering and Deplosive. The 'post' preset 
+                                    includes everything from 'flat' and Auto-Mixing, 
+                                    Dynamic-EQ, Multi speaker leveling, Loudness correction..
         :param int  status_interval_sec:
                                     The client can set the frequency of
                                     querying the status of the audio
@@ -202,18 +222,24 @@ class AudioEnhancer(object):
         :param int  progress_bar:   The client can enable/disable the display
                                     of the audio enhancement progress bar.
                                     (This param is optional)
-        :return:                    None
-        :rtype:                     None
+        :return:    sid:            The session ID.
+                    status:         Enhancment final status ("done" or "failure")
+                    resp_info:      Final status additinal info (Enhanced file url
+                                    if status "done. Error message if status "failure".)
+        :rtype:                     Tuple
         """
 
         spinner = None
         if progress_bar:
             spinner = Halo(spinner='dots', color='magenta', placement='right')
 
+        sid = None
+        status = None
+        resp_info = None
+
         try:
-            sid = None
             sid = self._enhancement_start(
-                self._api, src, dst, retention, progress_bar
+                self._api, src, dst, retention, preset, progress_bar
             )
             status, resp_info = self._wait_till_done(
                 sid, status_interval_sec, progress_bar, spinner
@@ -228,6 +254,8 @@ class AudioEnhancer(object):
 
         except Exception as e:
             self._logger.error(f"[{sid}] {e}")
+
+        return sid, status, resp_info
 
     @staticmethod
     def get_default_status_interval():

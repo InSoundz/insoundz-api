@@ -68,7 +68,7 @@ class insoundzAPI(object):
     def get_default_endpoint_url():
         return DEFAULT_ENDPOINT_URL
 
-    def enhance_file(self, retention=None, version=DEFAULT_ENHANCE_VERSION):
+    def enhance_file(self, retention=None, preset=None, version=DEFAULT_ENHANCE_VERSION):
         """
         Request the Audio API for a URL to upload the original audio file.
         The function returns an upload_url and a session_id
@@ -78,6 +78,10 @@ class insoundzAPI(object):
                                 of the enhanced audio file.
                                 for <retention> minutes.
                                 (This param is optional)
+
+        :param str preset:      The desired postprocessing preset for the 
+                                file in question. The avalible presets are
+                                'flat' and 'post'.
 
         :return:                A <session_id> and an <upload_url>.
         :rtype:                 Tuple
@@ -90,6 +94,9 @@ class insoundzAPI(object):
         data = {}
         if retention:
             data["retention"] = retention
+        
+        if preset:
+            data["preset"] = preset
 
         response = requests.post(
             url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC
