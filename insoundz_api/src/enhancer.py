@@ -152,7 +152,7 @@ class AudioEnhancer(object):
         else:
             self._logger.exception(f"[{sid}] Unexpected status {status}")
 
-    def _enhancement_start(self, api, src, dst, retention, preset, pbar):
+    def _enhancement_start(self, api, src, dst, retention, preset, enable_stereo, pbar):
         self._logger.info(f"Sending a request to insoundzAPI to enhance {src}")
 
         if validators.url(src):
@@ -161,7 +161,7 @@ class AudioEnhancer(object):
         if dst and validators.url(dst):
             raise Exception(f"Invalid destination path {dst}")
 
-        sid, src_url = api.enhance_file(retention, preset)
+        sid, src_url = api.enhance_file(retention, preset, enable_stereo)
 
         self._logger.info(
             f"[{sid}] Uploading {src} to insoundzAPI for processing."
@@ -172,7 +172,7 @@ class AudioEnhancer(object):
 
     def enhance_file(
         self, src, no_download=False, dst=None, retention=None,
-        preset=None, status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
+        preset=None, enable_stereo=False, status_interval_sec=DEFAULT_STATUS_INTERVAL_SEC,
         progress_bar=False
     ):
         """
@@ -214,6 +214,12 @@ class AudioEnhancer(object):
                                     Click sounds filtering and Deplosive. The 'post' preset 
                                     includes everything from 'flat' and Auto-Mixing, 
                                     Dynamic-EQ, Multi speaker leveling, Loudness correction..
+        :param bool enable_stereo:  If True, stereo processing will be enabled, which means
+                                    that both channels will be processed separately, and it
+                                    will cost 2 times more than mono processing. In mono processing
+                                    of a stereo file, only one channel is processed and duplicated
+                                    to both channels in postprocessing.
+                                    (This param is optional)
         :param int  status_interval_sec:
                                     The client can set the frequency of
                                     querying the status of the audio
@@ -239,7 +245,7 @@ class AudioEnhancer(object):
 
         try:
             sid = self._enhancement_start(
-                self._api, src, dst, retention, preset, progress_bar
+                self._api, src, dst, retention, preset, enable_stereo, progress_bar
             )
             status, resp_info = self._wait_till_done(
                 sid, status_interval_sec, progress_bar, spinner

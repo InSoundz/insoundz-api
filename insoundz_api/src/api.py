@@ -51,11 +51,9 @@ class insoundzAPI(object):
             "client_id": client_id,
             "secret": secret
         }
-
         response = requests.post(
             url, headers=self._headers, json=data, timeout=DEFAULT_TIMEOUT_SEC
         )
-
         response.raise_for_status()
 
         response = response.json()
@@ -68,7 +66,7 @@ class insoundzAPI(object):
     def get_default_endpoint_url():
         return DEFAULT_ENDPOINT_URL
 
-    def enhance_file(self, retention=None, preset=None, version=DEFAULT_ENHANCE_VERSION):
+    def enhance_file(self, retention=None, preset=None, enable_stereo=False, version=DEFAULT_ENHANCE_VERSION):
         """
         Request the Audio API for a URL to upload the original audio file.
         The function returns an upload_url and a session_id
@@ -83,6 +81,13 @@ class insoundzAPI(object):
                                 file in question. The avalible presets are
                                 'flat' and 'post'.
 
+        :param bool enable_stereo:  If True, stereo processing will be enabled, which means
+                            that both channels will be processed separately, and it
+                            will cost 2 times more than mono processing. In mono processing,
+                            of a stereo file, only one channel is processed and duplicated
+                            to both channels in postprocessing.
+                            (This param is optional)
+
         :return:                A <session_id> and an <upload_url>.
         :rtype:                 Tuple
         """
@@ -91,7 +96,7 @@ class insoundzAPI(object):
             f'{version}/enhance', '', '')
         )
 
-        data = {}
+        data = {'enable_stereo': enable_stereo}
         if retention:
             data["retention"] = retention
         
