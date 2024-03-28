@@ -22,10 +22,8 @@ NOTE: Please make sure you are running python3.7 or later.
 ## Help
 | Command       | Description                   |
 |---------------|:------------------------------|
-| balance       | Get client balance.           |
 | config        | Set or view config variables. |
 | enhance-file  | Enhance audio file.           |
-| version       | Display versions.             |
 
 ### Command: config
 
@@ -62,53 +60,30 @@ NOTE: Please make sure you are running python3.7 or later.
 | --status-interval | Check the enhancement process every <status_interval> [seconds]. | No | 0.5 |
 | --no-progress-bar | If set, progress-bar won't be displayed. | No | False |
 
-### Command: version 
-
-| Argument | Description | Required | Default |
-|----------|:------------|:---------|:--------|
-|----------|:------------|:---------|:--------|
-| --client-id       | Client ID for insoundz API services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID. | If not set with config command | None |
-| --secret          | Secret key to access insoundz API services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key. | If not set with config command | None |
-| --url             | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url. If not set and not permanently configured, the CLI will use the default url. | No | api.insoundz.io |
-
-### Command: balance 
-
-| Argument | Description | Required | Default |
-|----------|:------------|:---------|:--------|
-| --client-id       | Client ID for insoundz API services. If not set, the CLI uses the permanently configured client ID. If set, the CLI will use this client ID. | If not set with config command | None |
-| --secret          | Secret key to access insoundz API services. If not set, the CLI uses the permanently configured secret key. If set, the CLI will use this secret key. | If not set with config command | None |
-| --url             | Use an alternative endpoint URL (without the 'http://' prefix). If not set, the CLI uses the permanently configured url. If set, the CLI will use this url. If not set and not permanently configured, the CLI will use the default url. | No | api.insoundz.io |
-
 ## Getting started
 ```console
 insoundz_cli <command> <arg1> <arg2> ...
 ```
 
 ### Example #1:
-Get versions.
-```console
-insoundz_cli version
-```
-
-### Example #2:
 Permanently set client ID and secret key.
 ```console
 insoundz_cli config set --client-id XXXX-XXXX-XXXX-XXXX --secret XXXX-XXXX-XXXX-XXXX
 ```
 
-### Example #3:
+### Example #2:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "<current_path>/example_enhanced.wav").
 ```console
 insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav"
 ```
 
-### Example #4:
+### Example #3:
 Upload an audio file from our local machine and at the end of the audio enhancement process download the enhanced file to our local machine (to "/home/example_user/my_enhanced_files_dir/new_file.wav").
 ```console
 insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --dst="/home/example_user/my_enhanced_files_dir/new_file.wav"
 ```
 
-### Example #5:
+### Example #4:
 Upload an audio file from our local machine and at the end of the audio enhancement process don't download the enhanced files and request to keep the URL of the enhanced file valid for 8 hours.
 ```console
 insoundz_cli enhance-file --src="/home/example_user/my_audio_files/example.wav" --no-download --retention=480
